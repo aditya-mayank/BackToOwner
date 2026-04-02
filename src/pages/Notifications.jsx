@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { useNavigate, Navigate } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import DashboardLayout from '../components/DashboardLayout'
 /* ─── Confetti ───────────────────────────────────────────────────────── */
@@ -98,7 +98,7 @@ function MatchAlertCard({ notif }) {
       {/* Glow */}
       <div style={{ position:'absolute', top:'-60px', right:'-60px', width:'200px', height:'200px', borderRadius:'50%', background:'rgba(16,185,129,0.15)', filter:'blur(50px)', pointerEvents:'none' }} />
       {/* Header */}
-      <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', position:'relative', zIndex:1 }}>
+      <div className="match-header-row" style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', position:'relative', zIndex:1 }}>
         <div style={{ display:'flex', alignItems:'center', gap:'16px' }}>
           <div style={{ width:'56px', height:'56px', borderRadius:'16px', background:'linear-gradient(135deg,#10B981,#059669)', display:'flex', alignItems:'center', justifyContent:'center', boxShadow:'0 0 24px rgba(16,185,129,0.5)', color:'#fff' }}>
             <svg viewBox="0 0 24 24" fill="none" width="28" height="28"><path d="M5 13l4 4L19 7" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/></svg>
@@ -111,7 +111,7 @@ function MatchAlertCard({ notif }) {
         <ScoreRing score={score} />
       </div>
       {/* Info Rows Side-by-Side */}
-      <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'16px', position:'relative', zIndex:1 }}>
+      <div className="match-grid-2" style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'16px', position:'relative', zIndex:1 }}>
         {/* Your Item */}
         <div style={{ background:'var(--color-card)', padding:'20px', borderRadius:'16px', border:'1px dashed rgba(255,255,255,0.1)' }}>
           <p style={{ fontSize:'12px', fontWeight:700, textTransform:'uppercase', letterSpacing:'0.05em', color:'var(--color-text-muted)', marginBottom:'12px' }}>Your Lost Report</p>
@@ -137,7 +137,7 @@ function MatchAlertCard({ notif }) {
         <span style={{ fontSize:'13px', fontWeight:600, color:'#F59E0B' }}>Finder identity protected until you connect.</span>
       </div>
       {/* Buttons */}
-      <div style={{ display:'flex', gap:'12px', position:'relative', zIndex:1 }}>
+      <div className="match-action-row" style={{ display:'flex', gap:'12px', position:'relative', zIndex:1 }}>
         <motion.button
           onClick={() => navigate('/chat/123')}
           whileHover={{ scale:1.02 }} whileTap={{ scale:0.98 }}
@@ -227,7 +227,7 @@ export default function Notifications() {
     <DashboardLayout>
       <div style={{ maxWidth:'760px', margin:'0 auto' }}>
         {/* Header Options */}
-        <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-end', marginBottom:'32px' }}>
+        <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-end', marginBottom:'32px', flexWrap:'wrap', gap:'12px' }}>
           <div>
             <h1 style={{ fontSize:'clamp(24px,3vw,32px)', fontWeight:800, letterSpacing:'-0.03em', color:'var(--color-text-primary)' }}>
               Notifications
@@ -245,7 +245,7 @@ export default function Notifications() {
           </button>
         </div>
         {/* Tabs */}
-        <div style={{ display:'flex', gap:'8px', marginBottom:'32px', borderBottom:'1px solid rgba(255,255,255,0.1)', paddingBottom:'16px' }}>
+        <div className="tabs-row" style={{ display:'flex', gap:'8px', marginBottom:'32px', borderBottom:'1px solid rgba(255,255,255,0.1)', paddingBottom:'16px' }}>
           {TABS.map(t => (
             <button
               key={t}

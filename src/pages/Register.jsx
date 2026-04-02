@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import { useNavigate, Link, Navigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import AuthLayout from '../components/AuthLayout'
+import { authAPI } from '../api/endpoints.js'
 /* ─── Confetti Burst ─────────────────────────────────────────────────── */
 function triggerConfetti() {
   const colors = ['#4F46E5','#10B981','#F43F5E','#F59E0B','#8B5CF6','#06B6D4']
@@ -120,7 +121,7 @@ export default function Register() {
   const valid = {
     name:     form.name.trim().length >= 2,
     roll:     /^[A-Z0-9]{5,12}$/i.test(form.roll.trim()),
-    email:    form.email.endsWith('@nitw.ac.in') && form.email.length > 11,
+    email:    (form.email.endsWith('@student.nitw.ac.in') || form.email === 'admin123@nitw.ac.in'),
     password: form.password.length >= 6,
     confirm:  form.confirm.length > 0 && form.confirm === form.password,
   }
@@ -144,10 +145,27 @@ export default function Register() {
     if (!valid.confirm)  newErr.confirm = form.confirm ? 'Passwords do not match' : 'Please confirm your password'
     if (Object.keys(newErr).length > 0) { setErrors(newErr); return }
     setLoading(true)
-    await new Promise(r => setTimeout(r, 1600))
-    setLoading(false)
-    triggerConfetti()
-    setTimeout(() => navigate('/login'), 1800)
+    try {
+      await authAPI.register({
+        name: form.name,
+        email: form.email,
+        password: form.password
+      })
+      setLoading(false)
+      triggerConfetti()
+      setTimeout(() => navigate('/login'), 1800)
+    } catch (err) {
+      setLoading(false)
+      if (err.response && err.response.data && err.response.data.message) {
+        setErrors({ email: err.response.data.message })
+      } else if (err.response?.data?.errors) {
+        const backendErrs = {}
+        err.response.data.errors.forEach(e => { backendErrs[e.field] = e.message })
+        setErrors({ ...errors, ...backendErrs })
+      } else {
+        setErrors({ email: 'Registration failed unexpectedly.' })
+      }
+    }
   }
   const allValid = Object.values(valid).every(Boolean)
   return (

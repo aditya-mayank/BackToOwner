@@ -1,6 +1,4 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+/* Tailwind removed as it is unconfigured/unused */
 
 /* ─── CSS Design Tokens ──────────────────────────────────────────────── */
 :root {
@@ -130,6 +128,16 @@ body {
   50%       { opacity: 0; }
 }
 
+@keyframes pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%       { opacity: 0.6; transform: scale(1.15); }
+}
+
+@keyframes shimmer {
+  0%   { background-position: -200% center; }
+  100% { background-position:  200% center; }
+}
+
 @keyframes gradient-shift {
   0%   { background-position: 0%   50%; }
   50%  { background-position: 100% 50%; }
@@ -182,4 +190,131 @@ body {
   transform:     translateY(-2px);
   border-color:  var(--color-primary);
   color:         var(--color-primary);
+}
+
+/* ─── Responsive Utilities ───────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .desktop-only { display: none !important; }
+}
+@media (min-width: 769px) {
+  .mobile-only { display: none !important; }
+}
+
+.responsive-grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+.responsive-flex-wrap {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+/* ─── Mobile — up to 640px ───────────────────────────────────────────── */
+@media (max-width: 640px) {
+  /* Global padding scale-down */
+  .card-pad   { padding: 20px 16px !important; }
+  .section-pad { padding: 48px 16px !important; }
+
+  /* Responsive grid → single column */
+  .responsive-grid-2 { grid-template-columns: 1fr; }
+
+  /* ReportLost progress bar connector fix */
+  .progress-connector { display: none !important; }
+
+  /* Notifications match card grid → stack */
+  .match-grid-2 { grid-template-columns: 1fr !important; }
+
+  /* Notification match card header → stack */
+  .match-header-row {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 16px !important;
+  }
+
+  /* Match card buttons → full width stack */
+  .match-action-row {
+    flex-direction: column !important;
+  }
+  .match-action-row button { width: 100% !important; }
+
+  /* MyReports card top-row → stack */
+  .report-card-top {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 12px !important;
+  }
+  .report-card-badges { align-items: flex-start !important; }
+
+  /* MyReports actions → scroll */
+  .report-card-actions {
+    justify-content: flex-start !important;
+    overflow-x: auto;
+  }
+
+  /* AdminDashboard header → stack */
+  .admin-header {
+    flex-direction: column !important;
+    gap: 12px !important;
+    align-items: flex-start !important;
+  }
+
+  /* AdminDashboard table → cards view */
+  .admin-table-header { display: none !important; }
+  .admin-table-row {
+    display: flex !important;
+    flex-direction: column !important;
+    padding: 16px !important;
+    gap: 8px !important;
+    border-bottom: 1px solid rgba(255,255,255,0.07) !important;
+  }
+  .admin-table-cell { padding: 0 !important; font-size: 13px !important; }
+
+  /* SecureChat — reduce padding */
+  .chat-resolve-banner {
+    flex-direction: column !important;
+    gap: 10px !important;
+    align-items: flex-start !important;
+  }
+  .chat-resolve-banner button { width: 100% !important; }
+
+  /* Tabs — scrollable on small */
+  .tabs-row {
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 4px;
+    white-space: nowrap;
+  }
+  .tabs-row button { flex-shrink: 0; }
+
+  /* Profile stats → 1-per-row */
+  .profile-stat-card { flex: 1 1 100% !important; }
+
+  /* Hero floating card hidden on very small */
+  .hero-floating-card { display: none !important; }
+
+  /* HowItWorks connector line hidden */
+  .hiw-connector { display: none !important; }
+}
+
+/* ─── Tablet — 641px to 1024px ──────────────────────────────────────── */
+@media (min-width: 641px) and (max-width: 1024px) {
+  .responsive-grid-2 { grid-template-columns: 1fr 1fr; }
+  .match-grid-2 { grid-template-columns: 1fr 1fr; }
+}
+
+/* ─── Small mobile — up to 480px ────────────────────────────────────── */
+@media (max-width: 480px) {
+  /* Further reduce card padding */
+  .auth-form-card { padding: 24px 18px !important; }
+
+  /* ReportLost/Found form card */
+  .form-card { padding: 24px 16px !important; }
+
+  /* Profile avatar + name → tighter */
+  .profile-header-inner { flex-direction: column !important; align-items: flex-start !important; gap: 16px !important; }
+
+  /* Admin header padding */
+  .admin-main { padding: 16px !important; }
 }

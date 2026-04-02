@@ -3,28 +3,11 @@ import { motion, useInView } from 'framer-motion'
 /* ─── Stat Data ──────────────────────────────────────────────────────── */
 const STATS = [
   {
-    id: 'items-returned',
-    target: 500,
-    suffix: '+',
-    label: 'Items Returned',
-    sublabel: 'and counting across campus',
-    icon: (
-      <svg viewBox="0 0 24 24" fill="none" width="28" height="28">
-        <path d="M20 7H4a2 2 0 00-2 2v6a2 2 0 002 2h16a2 2 0 002-2V9a2 2 0 00-2-2z" stroke="currentColor" strokeWidth="2"/>
-        <path d="M1 10h22" stroke="currentColor" strokeWidth="2"/>
-        <path d="M8 15h.01M12 15h.01" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-      </svg>
-    ),
-    colorFrom: '#4F46E5',
-    colorTo:   '#818CF8',
-    glowColor: 'rgba(79,70,229,0.3)',
-  },
-  {
-    id: 'match-accuracy',
+    id: 'ai-matching',
     target: 70,
-    suffix: '%',
-    label: 'Match Accuracy',
-    sublabel: 'AI-powered NLP similarity',
+    suffix: '%+',
+    label: 'Match Threshold',
+    sublabel: 'AI triggers a match at 70%+ similarity',
     icon: (
       <svg viewBox="0 0 24 24" fill="none" width="28" height="28">
         <path d="M12 2l1.5 4.5L18 8l-4.5 1.5L12 14l-1.5-4.5L6 8l4.5-1.5L12 2z" stroke="currentColor" strokeWidth="2" strokeLinejoin="round"/>
@@ -32,21 +15,38 @@ const STATS = [
         <path d="M19 14l.75 2.25L22 17l-2.25.75L19 20l-.75-2.25L16 17l2.25-.75L19 14z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round"/>
       </svg>
     ),
+    colorFrom: '#4F46E5',
+    colorTo:   '#818CF8',
+    glowColor: 'rgba(79,70,229,0.3)',
+  },
+  {
+    id: 'campus-locations',
+    target: 80,
+    suffix: '+',
+    label: 'Campus Locations',
+    sublabel: 'Every corner of NITW campus covered',
+    icon: (
+      <svg viewBox="0 0 24 24" fill="none" width="28" height="28">
+        <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5a2.5 2.5 0 010-5 2.5 2.5 0 010 5z" fill="currentColor" opacity="0.2"/>
+        <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" stroke="currentColor" strokeWidth="2"/>
+        <circle cx="12" cy="9" r="2.5" stroke="currentColor" strokeWidth="1.8"/>
+      </svg>
+    ),
     colorFrom: '#10B981',
     colorTo:   '#34D399',
     glowColor: 'rgba(16,185,129,0.3)',
   },
   {
-    id: 'build-months',
-    target: 2,
-    suffix: ' Months',
-    label: 'Build Time',
-    sublabel: 'designed, built, deployed',
+    id: 'privacy-first',
+    target: 100,
+    suffix: '%',
+    label: 'Privacy Protected',
+    sublabel: 'No contact info shared until match confirmed',
     icon: (
       <svg viewBox="0 0 24 24" fill="none" width="28" height="28">
-        <rect x="3" y="4" width="18" height="18" rx="2" stroke="currentColor" strokeWidth="2"/>
-        <path d="M16 2v4M8 2v4M3 10h18" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-        <path d="M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+        <rect x="5" y="11" width="14" height="10" rx="2" stroke="currentColor" strokeWidth="2"/>
+        <path d="M8 11V7a4 4 0 018 0v4" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+        <circle cx="12" cy="16" r="1.5" fill="currentColor"/>
       </svg>
     ),
     colorFrom: '#F43F5E',
@@ -131,12 +131,12 @@ function StatItem({ stat, index, isInView }) {
       {/* Label */}
       <p style={{
         fontSize: '17px', fontWeight: 700, letterSpacing: '-0.015em',
-        color: '#F1F5F9', marginBottom: '6px',
+        color: 'var(--color-text-primary)', marginBottom: '6px',
       }}>
         {stat.label}
       </p>
       {/* Sublabel */}
-      <p style={{ fontSize: '13px', color: '#475569', fontWeight: 400 }}>
+      <p style={{ fontSize: '13px', color: 'var(--color-text-muted)', fontWeight: 400 }}>
         {stat.sublabel}
       </p>
     </motion.div>
@@ -154,7 +154,7 @@ export default function StatsBar() {
         position: 'relative',
         overflow: 'hidden',
         padding: '0',
-        background: '#0A0A16',
+        background: 'var(--color-bg-secondary)',
       }}
     >
       {/* Dot-grid pattern overlay */}
@@ -201,7 +201,7 @@ export default function StatsBar() {
         >
           <span style={{
             fontSize: '11px', fontWeight: 700, letterSpacing: '0.12em',
-            color: '#475569', textTransform: 'uppercase',
+            color: 'var(--color-text-muted)', textTransform: 'uppercase',
           }}>
             By the numbers
           </span>

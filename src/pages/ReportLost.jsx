@@ -1,7 +1,8 @@
 import React, { useState, useRef } from 'react'
-import { useNavigate, Navigate } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import DashboardLayout from '../components/DashboardLayout'
+import { itemsAPI } from '../api/endpoints.js'
 /* ─── Constants ──────────────────────────────────────────────────────── */
 const CATEGORIES = [
   { value: 'electronics', label: 'Electronics',  emoji: '📱' },
@@ -12,9 +13,63 @@ const CATEGORIES = [
   { value: 'keys',        label: 'Keys',          emoji: '🔑'  },
   { value: 'others',      label: 'Others',        emoji: '📦'  },
 ]
-const LOCATIONS = [
-  'Academic Block', 'Library', 'Hostel Area', 'Canteen',
-  'Sports Complex', 'Main Gate', 'Labs', 'Others',
+const LOCATION_GROUPS = [
+  {
+    group: '🚪 Main Entry & Roads',
+    options: ['Main Gate (Kakatiya Thoranam)', 'Secondary Gate', 'Security Checkpoint', 'NH Road (Campus Divider)', 'Internal Campus Roads'],
+  },
+  {
+    group: '🏢 Admin & Academic',
+    options: ['Administrative Building', 'Director Office', 'Dean Offices', 'Academic Block 1 (AB-1)', 'Academic Block 2 (AB-2)', 'Lecture Hall Complex (LHC)', 'Seminar Hall', 'CSE Department', 'ECE Department', 'EEE Department', 'Mechanical Department', 'Civil Department', 'Chemical Department', 'Metallurgy Department', 'Biotechnology Department'],
+  },
+  {
+    group: '🔬 Labs & Tech Centres',
+    options: ['Central Computer Centre (CCC)', 'Mega Computer Centre', 'Physics Lab', 'Chemistry Lab', 'Electrical Machines Lab', 'Robotics Lab', 'IoT Lab', 'Mechatronics Lab', 'High Voltage Lab', 'Research Centre / Centre of Excellence'],
+  },
+  {
+    group: '📚 Library & Study Areas',
+    options: ['Central Library', 'Reading Room', 'Digital Library Section', 'Journal Section', 'Discussion Room'],
+  },
+  {
+    group: '🏠 Boys Hostels',
+    options: ['Ultra Mega Hostel (1.8K)', '1K Hostel', 'Hostel Block A', 'Hostel Block B', 'Hostel Block C', 'Hostel Block D', 'Hostel Block E', 'International Hostel'],
+  },
+  {
+    group: '🏠 Girls Hostels',
+    options: ['Sarojini Hostel', 'Girls Hostel Block'],
+  },
+  {
+    group: '🍽️ Food & Eateries',
+    options: ['IFC A (Institute Food Court)', 'IFC B', 'IFC C', 'Priyadarshini Mess (Girls)', 'Govt Mess (Boys)', 'New NIT Canteen', 'Staff Canteen', 'Nescafe', 'Café Coffee Day', 'BRU Outlet', 'Amul Outlet'],
+  },
+  {
+    group: '🛒 Shopping & Services',
+    options: ['Shopping Complex', 'Xerox Shop', 'Laundry Shop', 'Salon', 'Stationery Shop', 'General Store', 'SBI Bank', 'ATM', 'Post Office', 'Health Centre / Dispensary'],
+  },
+  {
+    group: '🏋️ Sports & Fitness',
+    options: ['Sports Complex', 'Indoor Games Complex', 'Cricket Ground', 'Football Ground', 'Basketball Court', 'Volleyball Court', 'Tennis Court', 'Gymnasium'],
+  },
+  {
+    group: '🎭 Student Activity Areas',
+    options: ['Student Activity Centre (SAC)', 'Auditorium', 'Open Air Theatre (OAT)', 'Club Rooms', 'Fest Ground (Technozion / Springspree)', 'Music & Dance Room'],
+  },
+  {
+    group: '🏡 Faculty & Staff Areas',
+    options: ['Faculty Quarters', 'Staff Quarters', 'Director Bungalow', 'Guest House'],
+  },
+  {
+    group: '🚗 Transport & Utilities',
+    options: ['Motor Transport Section (MT)', 'Parking Area', 'Bus Stop (Inside Campus)', 'Power Station'],
+  },
+  {
+    group: '🌳 Campus Spots',
+    options: ['Dept Lawn', 'Hostel Grounds', 'Lake / Green Zone', 'Back Gate Area', 'Shortcut Path (Hostel–Dept)', 'Night Walk Road'],
+  },
+  {
+    group: '📍 Other',
+    options: ['Others (specify below)'],
+  },
 ]
 const STEPS = ['Item Details', 'Location & Time', 'Review & Submit']
 /* ─── Confetti ───────────────────────────────────────────────────────── */
@@ -218,8 +273,14 @@ function Step2({ data, setData }) {
             onBlur={() => setFocusLoc(false)}
             style={{ ...inputStyle(focusLoc), appearance:'none', cursor:'pointer' }}
           >
-            <option value="" disabled style={{ background: '#1a1a2e', color: '#fff' }}>Select campus location…</option>
-            {LOCATIONS.map(l => <option key={l} value={l} style={{ background: '#1a1a2e', color: '#fff' }}>{l}</option>)}
+          <option value="" disabled style={{ background: '#1a1a2e', color: '#fff' }}>Select campus location…</option>
+            {LOCATION_GROUPS.map(g => (
+              <optgroup key={g.group} label={g.group} style={{ background: '#1a1a2e', color: '#94A3B8', fontWeight: 600 }}>
+                {g.options.map(l => (
+                  <option key={l} value={l} style={{ background: '#1a1a2e', color: '#fff', fontWeight: 400 }}>{l}</option>
+                ))}
+              </optgroup>
+            ))}
           </select>
           <svg viewBox="0 0 24 24" fill="none" width="15" height="15" style={{ position:'absolute', right:'14px', top:'50%', transform:'translateY(-50%)', pointerEvents:'none', color:'var(--color-text-muted)' }}>
             <path d="M6 9l6 6 6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
@@ -228,7 +289,7 @@ function Step2({ data, setData }) {
       </FieldWrap>
       {/* Custom Location Input */}
       <AnimatePresence>
-        {data.location === 'Others' && (
+        {data.location === 'Others (specify below)' && (
           <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} style={{ overflow: 'hidden' }}>
             <FieldWrap>
               <Label>Specific Location</Label>
@@ -346,7 +407,7 @@ function Step3({ data, onSubmit, loading, success }) {
             { label:'Category',    value: data.category === 'others' && data.customCategory ? `📦 ${data.customCategory}` : (cat ? `${cat.emoji} ${cat.label}` : '—') },
             { label:'Visibility',  value: data.visibility === 'public' ? '🌐 Public' : '🔒 Private' },
             { label:'Item Name',   value: data.itemName   || '—' },
-            { label:'Location',    value: data.location === 'Others' && data.customLocation ? data.customLocation : (data.location || '—') },
+            { label:'Location',    value: data.location === 'Others (specify below)' && data.customLocation ? data.customLocation : (data.location || '—') },
             { label:'Date Lost',   value: data.dateLost ? new Date(data.dateLost).toLocaleDateString('en-IN',{day:'numeric',month:'long',year:'numeric'}) : '—' },
           ].map(({ label, value }) => (
             <div key={label} style={{ gridColumn: label === 'Item Name' ? 'span 2' : 'auto' }}>
@@ -435,7 +496,7 @@ function validate(step, data) {
   }
   if (step === 1) {
     if (!data.location) return 'Please select a campus location.'
-    if (data.location === 'Others' && !data.customLocation.trim()) return 'Please enter your custom location.'
+    if (data.location === 'Others (specify below)' && !data.customLocation.trim()) return 'Please enter your custom location.'
     if (!data.dateLost) return 'Please select the date you lost the item.'
   }
   return null
@@ -461,11 +522,39 @@ export default function ReportLost() {
   }
   const handleSubmit = async () => {
     setLoading(true)
-    await new Promise(r => setTimeout(r, 2000))
-    setLoading(false)
-    setSuccess(true)
-    triggerConfetti()
-    setTimeout(() => navigate('/dashboard'), 2500)
+    
+    const mapCategory = {
+      'electronics': 'Electronics',
+      'stationery': 'Stationery',
+      'id-cards': 'ID Card',
+      'clothing': 'Clothing',
+      'bags': 'Accessories',
+      'keys': 'Keys',
+      'others': 'Other'
+    };
+
+    try {
+      const formData = new FormData()
+      formData.append('title', data.itemName)
+      formData.append('description', data.description)
+      formData.append('category', mapCategory[data.category] || 'Other')
+
+      let loc = data.location
+      if (loc === 'Others (specify below)') loc = data.customLocation
+      formData.append('location', loc)
+
+      formData.append('visibility', data.visibility)
+
+      await itemsAPI.reportLost(formData)
+
+      setLoading(false)
+      setSuccess(true)
+      triggerConfetti()
+      setTimeout(() => navigate('/dashboard'), 2500)
+    } catch (apiError) {
+      setLoading(false)
+      setError(apiError.response?.data?.message || 'Submission strictly rejected natively or connection dropped.')
+    }
   }
   return (
     <DashboardLayout>

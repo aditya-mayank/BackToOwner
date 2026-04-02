@@ -3,143 +3,8 @@ import { useNavigate, Navigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { useAuth } from '../context/AuthContext'
 import DashboardLayout from '../components/DashboardLayout'
+import { itemsAPI } from '../api/endpoints.js'
 /* ─── Count-Up Hook ──────────────────────────────────────────────────── */
-function useCountUp(target, trigger, duration = 1200) {
-  const [count, setCount] = useState(0)
-  const raf = useRef(null)
-  useEffect(() => {
-    if (!trigger) return
-    let start = null
-    const step = (ts) => {
-      if (!start) start = ts
-      const p = Math.min((ts - start) / duration, 1)
-      const e = 1 - Math.pow(1 - p, 3) // ease-out cubic
-      setCount(Math.floor(e * target))
-      if (p < 1) raf.current = requestAnimationFrame(step)
-    }
-    raf.current = requestAnimationFrame(step)
-    return () => cancelAnimationFrame(raf.current)
-  }, [trigger, target, duration])
-  return count
-}
-/* ─── Stat Card ──────────────────────────────────────────────────────── */
-function StatCard({ label, target, suffix = '', icon, colorFrom, colorTo, glowColor, delay, trigger }) {
-  const count = useCountUp(target, trigger, 1100)
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 24 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.55, delay, ease: [0.16, 1, 0.3, 1] }}
-      whileHover={{ y: -4, transition: { duration: 0.2 } }}
-      style={{
-        flex: '1 1 160px',
-        padding: '22px 20px',
-        borderRadius: '20px',
-        background: 'var(--color-card)',
-        border: '1px solid var(--color-card-border)',
-        cursor: 'default',
-        position: 'relative', overflow: 'hidden',
-        boxShadow: '0 2px 16px rgba(0,0,0,0.12)',
-        transition: 'box-shadow 0.2s',
-      }}
-      onMouseEnter={e => e.currentTarget.style.boxShadow = `0 12px 40px ${glowColor}`}
-      onMouseLeave={e => e.currentTarget.style.boxShadow = '0 2px 16px rgba(0,0,0,0.12)'}
-    >
-      {/* Background blob */}
-      <div style={{ position: 'absolute', top: '-20px', right: '-20px', width: '90px', height: '90px', borderRadius: '50%', background: glowColor, filter: 'blur(24px)', pointerEvents: 'none' }}/>
-      {/* Icon */}
-      <div style={{
-        width: '42px', height: '42px', borderRadius: '12px', marginBottom: '16px',
-        background: `linear-gradient(135deg, ${colorFrom}, ${colorTo})`,
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
-        color: '#fff', boxShadow: `0 6px 20px ${glowColor}`,
-      }}>
-        {icon}
-      </div>
-      {/* Number */}
-      <div style={{ fontSize: '32px', fontWeight: 800, letterSpacing: '-0.04em', lineHeight: 1, color: colorFrom, marginBottom: '6px' }}>
-        {count}{suffix}
-      </div>
-      {/* Label */}
-      <p style={{ fontSize: '13px', fontWeight: 500, color: 'var(--color-text-secondary)', letterSpacing: '-0.01em' }}>
-        {label}
-      </p>
-    </motion.div>
-  )
-}
-/* ─── Quick Action Card ──────────────────────────────────────────────── */
-function QuickCard({ label, sub, href, colorFrom, colorTo, glowColor, delay, icon }) {
-  const navigate = useNavigate()
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 24 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.55, delay, ease: [0.16, 1, 0.3, 1] }}
-      whileHover={{ scale: 1.03, transition: { duration: 0.2 } }}
-      whileTap={{ scale: 0.98 }}
-      onClick={() => navigate(href)}
-      style={{
-        flex: '1 1 220px',
-        padding: '32px 28px',
-        borderRadius: '24px',
-        background: `linear-gradient(135deg, ${colorFrom}ee, ${colorTo}cc)`,
-        cursor: 'pointer', position: 'relative', overflow: 'hidden',
-        boxShadow: `0 8px 40px ${glowColor}`,
-        border: `1px solid ${colorFrom}40`,
-      }}
-      onMouseEnter={e => e.currentTarget.style.boxShadow = `0 16px 60px ${glowColor}`}
-      onMouseLeave={e => e.currentTarget.style.boxShadow = `0 8px 40px ${glowColor}`}
-    >
-      {/* Grid pattern */}
-      <div style={{
-        position: 'absolute', inset: 0,
-        backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.08) 1px, transparent 1px)',
-        backgroundSize: '22px 22px',
-        pointerEvents: 'none',
-      }}/>
-      {/* Glow orb */}
-      <div style={{ position: 'absolute', top: '-30px', right: '-30px', width: '140px', height: '140px', borderRadius: '50%', background: 'rgba(255,255,255,0.1)', filter: 'blur(30px)', pointerEvents: 'none' }}/>
-      {/* Animated icon */}
-      <motion.div
-        animate={{ rotate: [0, -8, 8, 0], scale: [1, 1.05, 1] }}
-        transition={{ duration: 3.5, repeat: Infinity, ease: 'easeInOut' }}
-        style={{ marginBottom: '18px', width: '52px', height: '52px', borderRadius: '16px', background: 'rgba(255,255,255,0.18)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', position: 'relative', zIndex: 1 }}
-      >
-        {icon}
-      </motion.div>
-      <h3 style={{ fontSize: '20px', fontWeight: 800, color: '#fff', letterSpacing: '-0.025em', marginBottom: '6px', position: 'relative', zIndex: 1 }}>
-        {label}
-      </h3>
-      <p style={{ fontSize: '13px', color: 'rgba(255,255,255,0.72)', lineHeight: 1.6, position: 'relative', zIndex: 1 }}>
-        {sub}
-      </p>
-      <div style={{ position: 'absolute', bottom: '20px', right: '20px', color: 'rgba(255,255,255,0.5)', zIndex: 1 }}>
-        <svg viewBox="0 0 24 24" fill="none" width="20" height="20"><path d="M5 12h14M12 5l7 7-7 7" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/></svg>
-      </div>
-    </motion.div>
-  )
-}
-/* ─── Skeleton Loader ────────────────────────────────────────────────── */
-function SkeletonItem() {
-  return (
-    <div style={{ display: 'flex', gap: '14px', padding: '16px 0', borderBottom: '1px solid var(--color-card-border)' }}>
-      <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: 'rgba(255,255,255,0.06)', flexShrink: 0, animation: 'pulse 1.5s ease-in-out infinite' }}/>
-      <div style={{ flex: 1 }}>
-        <div style={{ height: '13px', borderRadius: '6px', background: 'rgba(255,255,255,0.06)', marginBottom: '8px', width: '70%', animation: 'pulse 1.5s ease-in-out infinite' }}/>
-        <div style={{ height: '11px', borderRadius: '6px', background: 'rgba(255,255,255,0.04)', width: '40%', animation: 'pulse 1.5s ease-in-out infinite 0.2s' }}/>
-      </div>
-    </div>
-  )
-}
-/* ─── Activity Data ──────────────────────────────────────────────────── */
-const ACTIVITY = [
-  { id: 1, icon: '🎉', text: 'Your lost "Student ID Card" report matched with a found item!', time: '2 hours ago', color: '#10B981', type: 'match' },
-  { id: 2, icon: '📦', text: 'You submitted a found report for "Blue Water Bottle" near Canteen.', time: '5 hours ago', color: '#4F46E5', type: 'report' },
-  { id: 3, icon: '✅', text: '"Laptop Charger" has been marked as resolved by both parties.', time: '1 day ago', color: '#10B981', type: 'resolved' },
-  { id: 4, icon: '💬', text: 'New message from Priya S. regarding your ID card match.', time: '1 day ago', color: '#F59E0B', type: 'chat' },
-  { id: 5, icon: '🔑', text: 'You filed a lost report for "Keys (NIT Hostel)".', time: '3 days ago', color: '#7C3AED', type: 'report' },
-  { id: 6, icon: '🤖', text: 'AI engine found a 78% match for your "Wallet" report.', time: '4 days ago', color: '#06B6D4', type: 'match' },
-]
 /* ─── Activity Item ──────────────────────────────────────────────────── */
 function ActivityItem({ item, index }) {
   return (
@@ -182,35 +47,73 @@ function ActivityItem({ item, index }) {
 }
 /* ─── Dashboard Page ─────────────────────────────────────────────────── */
 export default function Dashboard() {
-  const [loaded, setLoaded] = useState(false)
   const { user } = useAuth()
   const navigate = useNavigate()
+  
+  const [loaded, setLoaded] = useState(false)
+  const [dynamicStats, setDynamicStats] = useState({ active: 0, matches: 0, resolved: 0, daysActive: 1 })
+  const [dynamicActivity, setDynamicActivity] = useState([])
+
   useEffect(() => {
-    const t = setTimeout(() => setLoaded(true), 1400)
-    return () => clearTimeout(t)
-  }, [])
+    if (!user) return;
+    async function fetchDashboardData() {
+      try {
+        const queryId = user._id || user.userId || user.id
+        if (!queryId) return;
+
+        const res = await itemsAPI.searchItems({ reportedBy: queryId });
+        const items = res.items || [];
+        
+        const active = items.filter(i => i.status !== 'resolved').length;
+        const resolved = items.filter(i => i.status === 'resolved').length;
+        
+        const creation = new Date(user.createdAt || Date.now());
+        const days = Math.max(1, Math.floor((Date.now() - creation.getTime()) / (1000 * 3600 * 24)));
+
+        setDynamicStats({ active, matches: 0, resolved, daysActive: days });
+
+        const mappedActs = items.slice(0, 6).map((item, idx) => ({
+          id: item._id,
+          icon: item.type === 'lost' ? '🔑' : '📦',
+          text: `You filed a ${item.type} report for "${item.title}" at ${item.location}.`,
+          time: new Date(item.createdAt).toLocaleDateString(),
+          color: item.type === 'lost' ? '#7C3AED' : '#4F46E5',
+          type: 'report'
+        }));
+        
+        setDynamicActivity(mappedActs);
+      } catch (err) {
+        console.error('Failed to fetch stats:', err);
+      } finally {
+        setLoaded(true);
+      }
+    }
+    fetchDashboardData();
+  }, [user]);
+
   const now = new Date()
   const greeting = now.getHours() < 12 ? 'Good morning' : now.getHours() < 17 ? 'Good afternoon' : 'Good evening'
   const dateStr  = now.toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })
   const firstName = user?.name?.split(' ')[0] || 'Student'
+  
   const STATS = [
     {
-      label: 'Active Reports', target: 3, suffix: '',
+      label: 'Active Reports', target: dynamicStats.active, suffix: '',
       colorFrom: '#4F46E5', colorTo: '#6366F1', glowColor: 'rgba(79,70,229,0.2)',
       icon: <svg viewBox="0 0 24 24" fill="none" width="20" height="20"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" stroke="currentColor" strokeWidth="2"/><path d="M14 2v6h6M16 13H8M16 17H8M10 9H8" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/></svg>,
     },
     {
-      label: 'Matches Found', target: 1, suffix: '',
+      label: 'Matches Found', target: dynamicStats.matches, suffix: '',
       colorFrom: '#10B981', colorTo: '#34D399', glowColor: 'rgba(16,185,129,0.2)',
       icon: <svg viewBox="0 0 24 24" fill="none" width="20" height="20"><path d="M12 2l1.5 4.5L18 8l-4.5 1.5L12 14l-1.5-4.5L6 8l4.5-1.5L12 2z" stroke="currentColor" strokeWidth="2" strokeLinejoin="round"/></svg>,
     },
     {
-      label: 'Items Resolved', target: 2, suffix: '',
+      label: 'Items Resolved', target: dynamicStats.resolved, suffix: '',
       colorFrom: '#7C3AED', colorTo: '#8B5CF6', glowColor: 'rgba(124,58,237,0.2)',
       icon: <svg viewBox="0 0 24 24" fill="none" width="20" height="20"><path d="M22 11.08V12a10 10 0 11-5.93-9.14" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/><path d="M22 4L12 14.01l-3-3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>,
     },
     {
-      label: 'Days Active', target: 14, suffix: '',
+      label: 'Days Active', target: dynamicStats.daysActive, suffix: '',
       colorFrom: '#F59E0B', colorTo: '#FBBF24', glowColor: 'rgba(245,158,11,0.2)',
       icon: <svg viewBox="0 0 24 24" fill="none" width="20" height="20"><rect x="3" y="4" width="18" height="18" rx="2" stroke="currentColor" strokeWidth="2"/><path d="M16 2v4M8 2v4M3 10h18" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/></svg>,
     },
@@ -295,12 +198,14 @@ export default function Dashboard() {
               background: 'rgba(79,70,229,0.1)', color: '#818CF8',
               border: '1px solid rgba(79,70,229,0.2)',
             }}>
-              {ACTIVITY.length} events
+              {dynamicActivity.length} events
             </span>
           </div>
           <div style={{ marginTop: '8px' }}>
             {loaded
-              ? ACTIVITY.map((item, i) => <ActivityItem key={item.id} item={item} index={i} />)
+              ? dynamicActivity.length > 0 
+                ? dynamicActivity.map((item, i) => <ActivityItem key={item.id} item={item} index={i} />)
+                : <p style={{ fontSize:'13px', color:'var(--color-text-muted)', textAlign:'center', padding:'20px 0' }}>No activity logged yet. Report an item to begin!</p>
               : [1, 2, 3, 4].map(i => <SkeletonItem key={i} />)
             }
           </div>

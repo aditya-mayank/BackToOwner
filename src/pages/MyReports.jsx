@@ -189,7 +189,7 @@ export default function MyReports() {
           <p style={{ fontSize:'14px', color:'var(--color-text-secondary)' }}>Manage your actively tracked lost and found items.</p>
         </div>
         {/* Tabs */}
-        <div style={{ display:'flex', gap:'8px', marginBottom:'32px', borderBottom:'1px solid rgba(255,255,255,0.1)', paddingBottom:'16px' }}>
+        <div className="tabs-row" style={{ display:'flex', gap:'8px', marginBottom:'32px', borderBottom:'1px solid rgba(255,255,255,0.1)', paddingBottom:'16px' }}>
           {TABS.map(t => (
             <button
               key={t}
@@ -246,7 +246,7 @@ export default function MyReports() {
                     }}
                   >
                     {/* Top Row: Info + Badges */}
-                    <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start' }}>
+                    <div className="report-card-top" style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start' }}>
                       <div style={{ display:'flex', flexDirection:'column', gap:'8px' }}>
                         <h2 style={{ fontSize:'20px', fontWeight:700, color:'var(--color-text-primary)' }}>{report.itemName}</h2>
                         <div style={{ display:'flex', alignItems:'center', gap:'10px' }}>
@@ -264,7 +264,7 @@ export default function MyReports() {
                         </div>
                       </div>
                       {/* Right side badges */}
-                      <div style={{ display:'flex', flexDirection:'column', alignItems:'flex-end', gap:'8px' }}>
+                      <div className="report-card-badges" style={{ display:'flex', flexDirection:'column', alignItems:'flex-end', gap:'8px' }}>
                         <div style={{ display:'inline-flex', alignItems:'center', gap:'6px', padding:'6px 14px', borderRadius:'10px', background:s.bg, color:s.color, fontSize:'13px', fontWeight:700, border:`1px solid ${s.color}40` }}>
                           <div style={{ width:'6px', height:'6px', borderRadius:'50%', background:s.color }} />
                           {s.label}
@@ -277,7 +277,7 @@ export default function MyReports() {
                       </div>
                     </div>
                     {/* Bottom Row: Actions */}
-                    <div style={{ display:'flex', justifyContent:'flex-end', gap:'12px', marginTop:'8px', borderTop:'1px solid rgba(255,255,255,0.05)', paddingTop:'16px' }}>
+                    <div className="report-card-actions" style={{ display:'flex', justifyContent:'flex-end', gap:'12px', marginTop:'8px', borderTop:'1px solid rgba(255,255,255,0.05)', paddingTop:'16px' }}>
                       <button 
                         onClick={() => setViewModal({ isOpen: true, report })}
                         style={{ padding:'8px 16px', borderRadius:'8px', border:'1px solid rgba(255,255,255,0.1)', background:'transparent', color:'var(--color-text-secondary)', fontSize:'13px', fontWeight:600, cursor:'pointer' }} 

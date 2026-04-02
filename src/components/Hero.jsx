@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { useNavigate, Navigate } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { useAuth } from '../context/AuthContext'
 /* ─── Typewriter ─────────────────────────────────────────────────────── */
@@ -127,7 +127,7 @@ function FloatingCard() {
             <svg viewBox="0 0 24 24" fill="none" width="13" height="13">
               <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5a2.5 2.5 0 010-5 2.5 2.5 0 010 5z" fill="#818CF8"/>
             </svg>
-            <span style={{ fontSize: '12px', fontWeight: 500, color: '#94A3B8' }}>LHC Block A</span>
+            <span style={{ fontSize: '12px', fontWeight: 500, color: '#94A3B8' }}>ECE Department</span>
           </div>
           <div style={{
             flex: 1, display: 'flex', alignItems: 'center', gap: '7px',
@@ -171,7 +171,7 @@ function FloatingCard() {
               }} />
             ))}
           </div>
-          <span style={{ fontSize: '11px', color: '#475569' }}>+247 items returned</span>
+          <span style={{ fontSize: '11px', color: '#475569' }}>Be the first to return something 🎯</span>
         </div>
       </motion.div>
       {/* Floating Badge – top right */}
@@ -418,9 +418,9 @@ export default function Hero() {
             }}
           >
             {[
-              { value: '1,200+', label: 'Items Returned' },
-              { value: '97%',    label: 'Match Accuracy' },
-              { value: '< 2hrs', label: 'Avg Return Time' },
+              { value: 'NITW',    label: 'Exclusive Campus' },
+              { value: 'AI',      label: 'Smart Matching' },
+              { value: '🔒',     label: 'Privacy First' },
             ].map(stat => (
               <div key={stat.label}>
                 <p style={{

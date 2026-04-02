@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { useNavigate, Navigate } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 /* ─── Mock Data ──────────────────────────────────────────────────────── */
 const STATS = [
@@ -71,7 +71,7 @@ export default function AdminDashboard() {
   return (
     <div style={{ minHeight:'100vh', background:'var(--color-bg)', display:'flex', flexDirection:'column' }}>
       {/* Navbar */}
-      <header style={{ height:'72px', background:'var(--color-card)', borderBottom:'1px solid var(--color-card-border)', display:'flex', alignItems:'center', justifyContent:'space-between', padding:'0 32px' }}>
+      <header className="admin-header" style={{ height:'auto', minHeight:'64px', background:'var(--color-card)', borderBottom:'1px solid var(--color-card-border)', display:'flex', alignItems:'center', justifyContent:'space-between', padding:'12px 20px', flexWrap:'wrap', gap:'12px' }}>
         <div style={{ display:'flex', alignItems:'center', gap:'12px' }}>
           <div style={{ padding:'6px 10px', background:'rgba(244,63,94,0.1)', color:'#F43F5E', borderRadius:'8px', fontSize:'12px', fontWeight:800, textTransform:'uppercase', border:'1px solid rgba(244,63,94,0.3)' }}>Admin Portal</div>
           <h1 style={{ fontSize:'20px', fontWeight:800, color:'var(--color-text-primary)' }}>BackToOwner</h1>
@@ -80,7 +80,7 @@ export default function AdminDashboard() {
           Exit Admin
         </button>
       </header>
-      <main style={{ flex:1, padding:'32px', maxWidth:'1200px', margin:'0 auto', width:'100%' }}>
+      <main className="admin-main" style={{ flex:1, padding:'24px', maxWidth:'1200px', margin:'0 auto', width:'100%' }}>
         {/* Stats Row */}
         <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit, minmax(240px, 1fr))', gap:'20px', marginBottom:'40px' }}>
           {STATS.map(stat => (
@@ -128,20 +128,20 @@ export default function AdminDashboard() {
                 </thead>
                 <tbody>
                   {loading ? (
-                    <>{[1,2,3,4,5].map(i => <tr key={i}><td colSpan="6"><SkeletonRow /></td></tr>)}</>
+                    <>{[1,2,3,4,5].map(i => <tr key={i} className="admin-table-row"><td colSpan="6"><SkeletonRow /></td></tr>)}</>
                   ) : (
                     MOCK_REPORTS.slice(0,5).map((r, i) => (
-                      <tr key={i} style={{ borderBottom:'1px solid rgba(255,255,255,0.05)', background: i%2===0 ? 'transparent' : 'rgba(255,255,255,0.01)' }}>
-                        <td style={{ padding:'16px 24px', fontSize:'14px', color:'var(--color-text-primary)', fontWeight:600 }}>{r.student}</td>
-                        <td style={{ padding:'16px 24px', fontSize:'14px', color:'var(--color-text-secondary)' }}>{r.item}</td>
-                        <td style={{ padding:'16px 24px', fontSize:'14px' }}>
+                      <tr key={i} className="admin-table-row" style={{ borderBottom:'1px solid rgba(255,255,255,0.05)', background: i%2===0 ? 'transparent' : 'rgba(255,255,255,0.01)' }}>
+                        <td className="admin-table-cell" style={{ padding:'16px 24px', fontSize:'14px', color:'var(--color-text-primary)', fontWeight:600 }}>{r.student}</td>
+                        <td className="admin-table-cell" style={{ padding:'16px 24px', fontSize:'14px', color:'var(--color-text-secondary)' }}>{r.item}</td>
+                        <td className="admin-table-cell" style={{ padding:'16px 24px', fontSize:'14px' }}>
                           <span style={{ padding:'4px 8px', borderRadius:'6px', background: r.status === 'Matched' ? 'rgba(16,185,129,0.1)' : 'rgba(79,70,229,0.1)', color: r.status === 'Matched' ? '#10B981' : '#818CF8', fontWeight:600, fontSize:'12px' }}>
                             {r.status}
                           </span>
                         </td>
-                        <td style={{ padding:'16px 24px', fontSize:'14px', color: r.score !== '-' ? '#10B981' : 'var(--color-text-muted)', fontWeight:700 }}>{r.score}{r.score !== '-' && '%'}</td>
-                        <td style={{ padding:'16px 24px', fontSize:'14px', color:'var(--color-text-muted)' }}>{r.date}</td>
-                        <td style={{ padding:'16px 24px', textAlign:'right' }}>
+                        <td className="admin-table-cell" style={{ padding:'16px 24px', fontSize:'14px', color: r.score !== '-' ? '#10B981' : 'var(--color-text-muted)', fontWeight:700 }}>{r.score}{r.score !== '-' && '%'}</td>
+                        <td className="admin-table-cell" style={{ padding:'16px 24px', fontSize:'14px', color:'var(--color-text-muted)' }}>{r.date}</td>
+                        <td className="admin-table-cell" style={{ padding:'16px 24px', textAlign:'right' }}>
                           <button style={{ background:'transparent', border:'none', color:'#4F46E5', fontSize:'13px', fontWeight:600, cursor:'pointer', marginRight:'12px' }}>View</button>
                           <button style={{ background:'transparent', border:'none', color:'#F43F5E', fontSize:'13px', fontWeight:600, cursor:'pointer' }}>Flag</button>
                         </td>

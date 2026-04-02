@@ -3,6 +3,7 @@ import { useNavigate, useLocation, Link, Navigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useAuth } from '../context/AuthContext'
 import AuthLayout from '../components/AuthLayout'
+import { authAPI } from '../api/endpoints.js'
 /* ─── Input Field ────────────────────────────────────────────────────── */
 function InputField({ id, label, type = 'text', value, onChange, error, placeholder, rightEl, autoComplete }) {
   return (
@@ -71,7 +72,7 @@ export default function Login() {
   const [success,   setSuccess]   = useState(false)
   const validateEmail = (val) => {
     if (!val) return 'Email is required'
-    if (!val.endsWith('@nitw.ac.in')) return 'Only NIT Warangal emails allowed'
+    if (!val.endsWith('@student.nitw.ac.in') && val !== 'admin123@nitw.ac.in') return 'Only student/admin emails allowed'
     return ''
   }
   const handleSubmit = async (e) => {
@@ -82,17 +83,23 @@ export default function Login() {
     if (pErr)   setPassErr(pErr)
     if (eErr || pErr) return
     setLoading(true)
-    // Simulate API call
-    await new Promise(r => setTimeout(r, 1200))
-    // Auth logic map
-    const role = email === 'admin@nitw.ac.in' ? 'admin' : 'student'
-    const name = email === 'admin@nitw.ac.in' ? 'Super Admin' : 'Arjun Reddy'
-    const roll = email === 'admin@nitw.ac.in' ? 'ADMIN01' : '22CSB0001'
-    login({ name, email, role, roll }, 'mock-jwt-token-7389')
-    setLoading(false)
-    setSuccess(true)
-    const destination = location.state?.from || '/dashboard'
-    setTimeout(() => navigate(destination), 800)
+    
+    try {
+      const dbResponse = await authAPI.login({ email, password })
+      login(dbResponse.user, dbResponse.token)
+      setLoading(false)
+      setSuccess(true)
+      const destination = location.state?.from || '/dashboard'
+      setTimeout(() => navigate(destination), 800)
+    } catch (err) {
+      setLoading(false)
+      if (err.response && err.response.data && err.response.data.message) {
+        setPassErr(err.response.data.message)
+      } else {
+        setPassErr('Network connection aborted or denied.')
+      }
+      setShakeKey(k => k + 1)
+    }
   }
   const EyeBtn = (
     <button

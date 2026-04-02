@@ -4,9 +4,9 @@ import { motion } from 'framer-motion'
 /* ─── Mini Dashboard Mockup (Left Panel) ────────────────────────────── */
 function DashboardMockup() {
   const items = [
-    { id: 1, name: 'Student ID Card', loc: 'LHC Block A', time: '2h ago', status: 'matched', color: '#10B981' },
-    { id: 2, name: 'Blue Water Bottle', loc: 'Canteen Area', time: '5h ago', status: 'searching', color: '#4F46E5' },
-    { id: 3, name: 'Laptop Charger', loc: 'Library L2', time: '1d ago', status: 'pending', color: '#F59E0B' },
+    { id: 1, name: 'Student ID Card', loc: 'CSE Department', time: '2h ago', status: 'matched', color: '#10B981' },
+    { id: 2, name: 'Blue Water Bottle', loc: 'IFC A (Institute Food Court)', time: '5h ago', status: 'searching', color: '#4F46E5' },
+    { id: 3, name: 'Laptop Charger', loc: 'Central Library', time: '1d ago', status: 'pending', color: '#F59E0B' },
   ]
   return (
     <div style={{
@@ -41,7 +41,7 @@ function DashboardMockup() {
       <div style={{ marginBottom:'24px' }}>
         <p style={{ fontSize:'11px', color:'#475569', fontWeight:600, letterSpacing:'0.06em', marginBottom:'4px' }}>DASHBOARD</p>
         <h2 style={{ fontSize:'22px', fontWeight:800, color:'#F1F5F9', letterSpacing:'-0.03em' }}>Good morning, Warrior 👋</h2>
-        <p style={{ fontSize:'13px', color:'#64748B', marginTop:'4px' }}>You have 1 new match today.</p>
+        <p style={{ fontSize:'13px', color:'#64748B', marginTop:'4px' }}>AI matching is live and ready.</p>
       </div>
       {/* Match Alert */}
       <motion.div
@@ -58,7 +58,7 @@ function DashboardMockup() {
           <span style={{ fontSize:'11px', padding:'2px 8px', borderRadius:'6px', background:'rgba(16,185,129,0.15)', color:'#10B981', fontWeight:600 }}>97% match</span>
         </div>
         <p style={{ fontSize:'14px', fontWeight:700, color:'#F1F5F9', marginBottom:'3px' }}>Student ID Card found!</p>
-        <p style={{ fontSize:'12px', color:'#64748B' }}>📍 LHC Block A · 2 hours ago</p>
+        <p style={{ fontSize:'12px', color:'#64748B' }}>📍 CSE Department · 2 hours ago</p>
       </motion.div>
       {/* Items List */}
       <p style={{ fontSize:'11px', color:'#475569', fontWeight:700, letterSpacing:'0.06em', marginBottom:'12px' }}>RECENT REPORTS</p>
@@ -92,7 +92,7 @@ function DashboardMockup() {
       </div>
       {/* Mini Stats */}
       <div style={{ display:'flex', gap:'10px', marginTop:'20px' }}>
-        {[['500+','Returned'],['97%','AI Acc.'],['2hrs','Avg.']].map(([v,l]) => (
+        {[['70%+','Match Threshold'],['80+','Campus Spots'],['100%','Privacy']].map(([v,l]) => (
           <div key={l} style={{
             flex:1, padding:'12px', borderRadius:'12px', textAlign:'center',
             background:'rgba(79,70,229,0.08)', border:'1px solid rgba(79,70,229,0.15)',

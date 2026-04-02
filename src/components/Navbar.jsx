@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { useNavigate, Link, Navigate } from 'react-router-dom'
+import { useNavigate, Link } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useAuth } from '../context/AuthContext'
 import { Sun, Moon, Menu, X } from 'lucide-react'
@@ -80,7 +80,7 @@ export default function Navbar({ isDark, toggleDark }) {
             </span>
           </motion.a>
           {/* Desktop Nav Links */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '36px' }} className="hidden md:flex">
+          <div style={{ display: 'flex', alignItems: 'center', gap: '36px' }} className="desktop-only">
             {NAV_LINKS.map((link, i) => (
               <motion.a
                 key={link.label}
@@ -134,7 +134,7 @@ export default function Navbar({ isDark, toggleDark }) {
                 </AnimatePresence>
               </motion.button>
               {/* Desktop Auth CTA */}
-              <div className="hidden md:flex" style={{ alignItems: 'center', gap: '12px' }}>
+              <div className="desktop-only" style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                 {isLoggedIn ? (
                   <motion.button
                     onClick={() => navigate('/dashboard')}
@@ -188,7 +188,7 @@ export default function Navbar({ isDark, toggleDark }) {
             {/* Hamburger — Mobile */}
             <motion.button
               id="mobile-menu-btn"
-              className="flex md:hidden"
+              className="mobile-only"
               aria-label="Toggle mobile menu"
               onClick={() => setMenuOpen(v => !v)}
               whileTap={{ scale: 0.9 }}
@@ -211,6 +211,7 @@ export default function Navbar({ isDark, toggleDark }) {
         {menuOpen && (
           <motion.div
             id="mobile-drawer"
+            className="mobile-only"
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
             exit={{   opacity: 0, height: 0 }}
@@ -218,22 +219,23 @@ export default function Navbar({ isDark, toggleDark }) {
             style={{
               position: 'fixed', top: 'var(--navbar-height)', left: 0, right: 0,
               zIndex: 99, overflow: 'hidden',
-              background: 'var(--glass-bg)',
-              backdropFilter: 'var(--glass-blur)',
-              WebkitBackdropFilter: 'var(--glass-blur)',
+              background: 'var(--color-bg)',
               borderBottom: '1px solid var(--glass-border)',
+              boxShadow: '0 20px 40px rgba(0,0,0,0.4)',
             }}
           >
-            <div style={{ padding: '20px 24px', display: 'flex', flexDirection: 'column', gap: '18px' }}>
+            <div style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
               {NAV_LINKS.map(link => (
                 <a
                   key={link.label}
                   href={link.href}
                   onClick={() => setMenuOpen(false)}
                   style={{
-                    fontSize: '15px', fontWeight: 500,
-                    color: 'var(--color-text-secondary)',
+                    fontSize: '18px', fontWeight: 600,
+                    color: 'var(--color-text-primary)',
                     textDecoration: 'none',
+                    padding: '8px 0',
+                    borderBottom: '1px solid rgba(255,255,255,0.03)',
                   }}
                 >
                   {link.label}
@@ -243,22 +245,23 @@ export default function Navbar({ isDark, toggleDark }) {
                 <button
                   onClick={() => { setMenuOpen(false); navigate('/dashboard'); }}
                   style={{
-                    padding: '12px', borderRadius: '10px',
+                    padding: '16px', borderRadius: '12px',
                     background: 'linear-gradient(135deg, #10B981, #059669)',
-                    color: '#fff', fontSize: '14px', fontWeight: 600,
+                    color: '#fff', fontSize: '16px', fontWeight: 700,
                     border: 'none', cursor: 'pointer',
+                    boxShadow: '0 8px 20px rgba(16,185,129,0.3)',
                   }}
                 >
                   Go to Dashboard
                 </button>
               ) : (
-                <>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginTop: '8px' }}>
                   <button
                     onClick={() => { setMenuOpen(false); navigate('/login'); }}
                     style={{
-                      padding: '12px', borderRadius: '10px',
-                      background: 'rgba(255,255,255,0.05)', border: '1px solid var(--glass-border)',
-                      color: 'var(--color-text-primary)', fontSize: '14px', fontWeight: 600,
+                      padding: '14px', borderRadius: '12px',
+                      background: 'rgba(255,255,255,0.03)', border: '1px solid var(--glass-border)',
+                      color: 'var(--color-text-primary)', fontSize: '15px', fontWeight: 600,
                       cursor: 'pointer',
                     }}
                   >
@@ -267,15 +270,16 @@ export default function Navbar({ isDark, toggleDark }) {
                   <button
                     onClick={() => { setMenuOpen(false); navigate('/register'); }}
                     style={{
-                      padding: '12px', borderRadius: '10px',
+                      padding: '14px', borderRadius: '12px',
                       background: 'linear-gradient(135deg, #4F46E5, #6366F1)',
-                      color: '#fff', fontSize: '14px', fontWeight: 600,
+                      color: '#fff', fontSize: '15px', fontWeight: 600,
                       border: 'none', cursor: 'pointer',
+                      boxShadow: '0 4px 14px rgba(79,70,229,0.4)',
                     }}
                   >
                     Register
                   </button>
-                </>
+                </div>
               )}
             </div>
           </motion.div>

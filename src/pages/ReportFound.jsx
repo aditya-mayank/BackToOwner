@@ -1,7 +1,8 @@
 import React, { useState, useRef } from 'react'
-import { useNavigate, Navigate } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import DashboardLayout from '../components/DashboardLayout'
+import { itemsAPI } from '../api/endpoints.js'
 /* ─── Constants ──────────────────────────────────────────────────────── */
 const CATEGORIES = [
   { value: 'electronics', label: 'Electronics',  emoji: '📱' },
@@ -12,9 +13,21 @@ const CATEGORIES = [
   { value: 'keys',        label: 'Keys',         emoji: '🔑'  },
   { value: 'others',      label: 'Others',       emoji: '📦'  },
 ]
-const LOCATIONS = [
-  'Academic Block', 'Library', 'Hostel Area', 'Canteen',
-  'Sports Complex', 'Main Gate', 'Labs', 'Others',
+const LOCATION_GROUPS = [
+  { group: '🚪 Main Entry & Roads', options: ['Main Gate (Kakatiya Thoranam)', 'Secondary Gate', 'Security Checkpoint', 'NH Road (Campus Divider)', 'Internal Campus Roads'] },
+  { group: '🏢 Admin & Academic', options: ['Administrative Building', 'Director Office', 'Dean Offices', 'Academic Block 1 (AB-1)', 'Academic Block 2 (AB-2)', 'Lecture Hall Complex (LHC)', 'Seminar Hall', 'CSE Department', 'ECE Department', 'EEE Department', 'Mechanical Department', 'Civil Department', 'Chemical Department', 'Metallurgy Department', 'Biotechnology Department'] },
+  { group: '🔬 Labs & Tech Centres', options: ['Central Computer Centre (CCC)', 'Mega Computer Centre', 'Physics Lab', 'Chemistry Lab', 'Electrical Machines Lab', 'Robotics Lab', 'IoT Lab', 'Mechatronics Lab', 'High Voltage Lab', 'Research Centre / Centre of Excellence'] },
+  { group: '📚 Library & Study Areas', options: ['Central Library', 'Reading Room', 'Digital Library Section', 'Journal Section', 'Discussion Room'] },
+  { group: '🏠 Boys Hostels', options: ['Ultra Mega Hostel (1.8K)', '1K Hostel', 'Hostel Block A', 'Hostel Block B', 'Hostel Block C', 'Hostel Block D', 'Hostel Block E', 'International Hostel'] },
+  { group: '🏠 Girls Hostels', options: ['Sarojini Hostel', 'Girls Hostel Block'] },
+  { group: '🍽️ Food & Eateries', options: ['IFC A (Institute Food Court)', 'IFC B', 'IFC C', 'Priyadarshini Mess (Girls)', 'Govt Mess (Boys)', 'New NIT Canteen', 'Staff Canteen', 'Nescafe', 'Café Coffee Day', 'BRU Outlet', 'Amul Outlet'] },
+  { group: '🛒 Shopping & Services', options: ['Shopping Complex', 'Xerox Shop', 'Laundry Shop', 'Salon', 'Stationery Shop', 'General Store', 'SBI Bank', 'ATM', 'Post Office', 'Health Centre / Dispensary'] },
+  { group: '🏋️ Sports & Fitness', options: ['Sports Complex', 'Indoor Games Complex', 'Cricket Ground', 'Football Ground', 'Basketball Court', 'Volleyball Court', 'Tennis Court', 'Gymnasium'] },
+  { group: '🎭 Student Activity Areas', options: ['Student Activity Centre (SAC)', 'Auditorium', 'Open Air Theatre (OAT)', 'Club Rooms', 'Fest Ground (Technozion / Springspree)', 'Music & Dance Room'] },
+  { group: '🏡 Faculty & Staff Areas', options: ['Faculty Quarters', 'Staff Quarters', 'Director Bungalow', 'Guest House'] },
+  { group: '🚗 Transport & Utilities', options: ['Motor Transport Section (MT)', 'Parking Area', 'Bus Stop (Inside Campus)', 'Power Station'] },
+  { group: '🌳 Campus Spots', options: ['Dept Lawn', 'Hostel Grounds', 'Lake / Green Zone', 'Back Gate Area', 'Shortcut Path (Hostel–Dept)', 'Night Walk Road'] },
+  { group: '📍 Other', options: ['Others (specify below)'] },
 ]
 /* ─── Confetti ───────────────────────────────────────────────────────── */
 function triggerConfetti() {
@@ -104,7 +117,7 @@ export default function ReportFound() {
     if (data.category === 'others' && !data.customCategory.trim()) return 'Please enter a custom category.'
     if (!data.itemName.trim()) return 'Please enter the item name.'
     if (!data.location) return 'Please select where you found it.'
-    if (data.location === 'Others' && !data.customLocation.trim()) return 'Please enter the specific location.'
+    if (data.location === 'Others (specify below)' && !data.customLocation.trim()) return 'Please enter the specific location.'
     if (!data.dateFound) return 'Please select when you found it.'
     return null
   }
@@ -117,12 +130,41 @@ export default function ReportFound() {
     }
     setError('')
     setLoading(true)
-    // Simulate API request
-    await new Promise(r => setTimeout(r, 2000))
-    setLoading(false)
-    setSuccess(true)
-    triggerConfetti()
-    setTimeout(() => navigate('/dashboard'), 3500)
+
+    const mapCategory = {
+      'electronics': 'Electronics',
+      'stationery': 'Stationery',
+      'id-cards': 'ID Card',
+      'clothing': 'Clothing',
+      'bags': 'Accessories',
+      'keys': 'Keys',
+      'others': 'Other'
+    };
+
+    try {
+      const formData = new FormData();
+      formData.append('title', data.itemName);
+      formData.append('description', data.description || 'Found item securely reported relative to map parameters.');
+      formData.append('category', mapCategory[data.category] || 'Other');
+      
+      let loc = data.location;
+      if (loc === 'Others (specify below)') loc = data.customLocation;
+      formData.append('location', loc);
+      
+      // Found items don't have visibility exposed on UI, we lock to private natively (default true in DB)
+      if (data.photo) formData.append('image', data.photo);
+
+      await itemsAPI.reportFound(formData);
+
+      setLoading(false)
+      setSuccess(true)
+      triggerConfetti()
+      setTimeout(() => navigate('/dashboard'), 3500)
+    } catch (apiError) {
+      setLoading(false)
+      setError(apiError.response?.data?.message || 'Secure item upload aborted or disconnected. Please try again.')
+      window.scrollTo({ top: 0, behavior: 'smooth' })
+    }
   }
   return (
     <DashboardLayout>
@@ -168,6 +210,7 @@ export default function ReportFound() {
         {/* Main Form Card */}
         <motion.div
           initial={{ opacity:0, y:20 }} animate={{ opacity:1, y:0 }} transition={{ delay: 0.2 }}
+          className="form-card"
           style={{
             background:'var(--color-card)',
             border:'1px solid var(--color-card-border)',
@@ -265,9 +308,9 @@ export default function ReportFound() {
                   style={{ ...inputStyle(focusDesc), resize:'vertical', lineHeight:1.65 }}
                 />
               </FieldWrap>
-              <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'20px', '@media(max-width: 600px)':{ gridTemplateColumns:'1fr' } }}>
+              <div style={{ display:'flex', flexWrap:'wrap', gap:'20px' }}>
                 {/* Location */}
-                <FieldWrap style={{ marginBottom: 0 }}>
+                <FieldWrap style={{ marginBottom: 0, flex:'1 1 200px' }}>
                   <Label>Where did you find it?</Label>
                   <div style={{ position:'relative' }}>
                     <select
@@ -279,7 +322,13 @@ export default function ReportFound() {
                       style={{ ...inputStyle(focusLoc), appearance:'none', cursor:'pointer' }}
                     >
                       <option value="" disabled style={{ background: '#1a1a2e', color: '#fff' }}>Select campus location…</option>
-                      {LOCATIONS.map(l => <option key={l} value={l} style={{ background: '#1a1a2e', color: '#fff' }}>{l}</option>)}
+                      {LOCATION_GROUPS.map(g => (
+                        <optgroup key={g.group} label={g.group} style={{ background: '#1a1a2e', color: '#94A3B8', fontWeight: 600 }}>
+                          {g.options.map(l => (
+                            <option key={l} value={l} style={{ background: '#1a1a2e', color: '#fff', fontWeight: 400 }}>{l}</option>
+                          ))}
+                        </optgroup>
+                      ))}
                     </select>
                     <svg viewBox="0 0 24 24" fill="none" width="15" height="15" style={{ position:'absolute', right:'14px', top:'50%', transform:'translateY(-50%)', pointerEvents:'none', color:'var(--color-text-muted)' }}>
                       <path d="M6 9l6 6 6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
@@ -287,7 +336,7 @@ export default function ReportFound() {
                   </div>
                 </FieldWrap>
                 {/* Date/Time */}
-                <FieldWrap style={{ marginBottom: 0 }}>
+                <FieldWrap style={{ marginBottom: 0, flex:'1 1 200px' }}>
                   <Label>When did you find it?</Label>
                   <input
                     id="found-date-input"
@@ -303,9 +352,9 @@ export default function ReportFound() {
               </div>
               {/* Custom Location Input */}
               <AnimatePresence>
-                {data.location === 'Others' && (
+                {data.location === 'Others (specify below)' && (
                   <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto', marginTop: '20px' }} exit={{ opacity: 0, height: 0, marginTop: 0 }} style={{ overflow: 'hidden' }}>
-                    <FieldWrap style={{ marginBottom: 0 }}>
+                    <FieldWrap style={{ marginBottom: 0, flex:'1 1 200px' }}>
                       <Label>Specific Location</Label>
                       <input
                         type="text"

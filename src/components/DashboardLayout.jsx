@@ -1,9 +1,7 @@
 import React, { useState } from 'react'
-import { useNavigate, Link, NavLink, Navigate } from 'react-router-dom'
+import { useNavigate, NavLink } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useAuth } from '../context/AuthContext'
-/* ─── Mock user ──────────────────────────────────────────────────────── */
-const USER = { name: 'Arjun Reddy', roll: '22CSB0001', dept: 'CSE · 2022', initials: 'AR' }
 const SIDEBAR_W = 248
 /* ─── Nav items ──────────────────────────────────────────────────────── */
 const NAV = [
