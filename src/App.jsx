@@ -4,6 +4,8 @@ import { motion, AnimatePresence } from 'framer-motion'
 import ProtectedRoute from './components/ProtectedRoute'
 import AdminRoute from './components/AdminRoute'
 import { AuthProvider } from './context/AuthContext'
+import { useAuth } from './context/AuthContext'
+import DashboardLayout from './components/DashboardLayout'
 import Navbar     from './components/Navbar'
 import Hero       from './components/Hero'
 import HowItWorks from './components/HowItWorks'
@@ -23,9 +25,11 @@ import NotFound       from './pages/NotFound'
 import About          from './pages/About'
 /* ─── Landing Page ───────────────────────────────────────────────────── */
 function LandingPage({ isDark, toggleDark }) {
-  return (
+  const { isLoggedIn } = useAuth()
+
+  const content = (
     <>
-      <Navbar isDark={isDark} toggleDark={toggleDark} />
+      {!isLoggedIn && <Navbar isDark={isDark} toggleDark={toggleDark} />}
       <main>
         <Hero />
         <HowItWorks />
@@ -33,6 +37,13 @@ function LandingPage({ isDark, toggleDark }) {
       </main>
     </>
   )
+
+  // If logged in, show the sidebar alongside the home content
+  if (isLoggedIn) {
+    return <DashboardLayout>{content}</DashboardLayout>
+  }
+
+  return content
 }
 /* ─── Page Transition Wrapper ────────────────────────────────────────── */
 const PageWrapper = ({ children }) => (

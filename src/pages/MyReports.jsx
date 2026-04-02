@@ -18,7 +18,7 @@ export default function MyReports() {
     async function loadReports() {
       try {
         const qId = user._id || user.userId || user.id;
-        const res = await itemsAPI.searchItems({ reportedBy: qId });
+        const res = await itemsAPI.searchItems({ reportedBy: qId, status: 'all' });
         const mapped = (res.results || []).map(item => ({
           id: item._id,
           type: item.type,

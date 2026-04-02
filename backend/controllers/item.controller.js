@@ -187,16 +187,21 @@ export const reportLostItem = async (req, res) => {
 
 export const searchItems = async (req, res) => {
   try {
-    const { category, location, keyword, reportedBy } = req.query;
+    const { category, location, keyword, reportedBy, status } = req.query;
 
     // 1. Construct Query
-    // Default to active+public, BUT if specifically searching by user, show all their items
     const query = {};
+
     if (reportedBy) {
       query.reportedBy = reportedBy;
+      if (status && status !== 'all') query.status = status;
     } else {
-      query.status = 'active';
       query.visibility = 'public';
+      if (status && status !== 'all') {
+        query.status = status;
+      } else if (!status) {
+        query.status = 'active';
+      }
     }
     
     if (category) {

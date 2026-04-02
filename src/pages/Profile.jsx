@@ -70,7 +70,7 @@ export default function Profile() {
   const STAT_ITEMS = [
     { label: 'Reports Filed', value: stats.totalReports, colorFrom: '#4F46E5', colorTo: '#6366F1' },
     { label: 'Items Recovered', value: stats.resolvedReports, colorFrom: '#10B981', colorTo: '#34D399' },
-    { label: 'Match Rate', value: stats.matchRate, colorFrom: '#F59E0B', colorTo: '#FBBF24' },
+    { label: 'Success Rate', value: stats.matchRate, colorFrom: '#F59E0B', colorTo: '#FBBF24' },
   ]
 
   if (loading) {

@@ -166,14 +166,14 @@ export default function Notifications() {
         <div style={{ display:'flex', flexDirection:'column', gap:'16px' }}>
           <AnimatePresence>
             {specialMatch && (
-              <MatchAlertCard key={`special-${specialMatch.id}`} notif={specialMatch} />
+              <MatchAlertCard key={`special-${specialMatch._id}`} notif={specialMatch} />
             )}
           </AnimatePresence>
           <AnimatePresence>
             {listItems.length > 0 ? (
               listItems.map(notif => (
                 <motion.div
-                  key={notif.id}
+                  key={notif._id}
                   initial={{ opacity:0, y:10 }} animate={{ opacity:1, y:0 }} exit={{ opacity:0, scale:0.95 }}
                 >
                   <NotificationCard notif={notif} onMarkRead={markRead} />

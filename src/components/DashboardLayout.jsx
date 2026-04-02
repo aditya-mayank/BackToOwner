@@ -61,6 +61,9 @@ function SidebarContent({ collapsed, setCollapsed, onClose }) {
   const navigate = useNavigate()
   const { user, logout } = useAuth()
   const [hasMatches, setHasMatches] = useState(false)
+  const [isDark, setIsDark] = useState(() =>
+    localStorage.getItem('backtoowner-theme') !== 'light'
+  )
 
   React.useEffect(() => {
     if (!user) return;
@@ -84,6 +87,7 @@ function SidebarContent({ collapsed, setCollapsed, onClose }) {
   }
 
   const dynamicNav = [
+    { id: 'home', label: 'Home', href: '/', icon: <svg viewBox="0 0 24 24" fill="none" width="18" height="18"><path d="M3 9.5L12 3l9 6.5V20a1 1 0 01-1 1H5a1 1 0 01-1-1V9.5z" stroke="currentColor" strokeWidth="2" strokeLinejoin="round"/><path d="M9 21V12h6v9" stroke="currentColor" strokeWidth="2" strokeLinejoin="round"/></svg> },
     { id: 'dashboard', label: 'Dashboard', href: '/dashboard', icon: <svg viewBox="0 0 24 24" fill="none" width="18" height="18"><rect x="3" y="3" width="7" height="7" rx="1.5" stroke="currentColor" strokeWidth="2"/><rect x="14" y="3" width="7" height="7" rx="1.5" stroke="currentColor" strokeWidth="2"/><rect x="3" y="14" width="7" height="7" rx="1.5" stroke="currentColor" strokeWidth="2"/><rect x="14" y="14" width="7" height="7" rx="1.5" stroke="currentColor" strokeWidth="2"/></svg> },
     { id: 'report-lost', label: 'Report Lost', href: '/report-lost', icon: <svg viewBox="0 0 24 24" fill="none" width="18" height="18"><circle cx="11" cy="11" r="8" stroke="currentColor" strokeWidth="2"/><path d="m21 21-4.35-4.35M11 8v3m0 0v3m0-3H8m3 0h3" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/></svg> },
     { id: 'report-found', label: 'Report Found', href: '/report-found', icon: <svg viewBox="0 0 24 24" fill="none" width="18" height="18"><path d="M9 12l2 2 4-4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/><path d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v14a2 2 0 002 2h7" stroke="currentColor" strokeWidth="2"/><path d="M16 19h6M19 16v6" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/></svg> },
@@ -95,15 +99,16 @@ function SidebarContent({ collapsed, setCollapsed, onClose }) {
 
   const handleToggleTheme = () => {
     const root = document.documentElement;
-    const isDark = root.classList.contains('dark');
-    const newMode = isDark ? 'light' : 'dark';
-    root.classList.toggle('dark',  newMode === 'dark');
-    root.classList.toggle('light', newMode === 'light');
-    localStorage.setItem('backtoowner-theme', newMode);
+    const newDark = !isDark;
+    root.classList.toggle('dark',  newDark);
+    root.classList.toggle('light', !newDark);
+    localStorage.setItem('backtoowner-theme', newDark ? 'dark' : 'light');
+    setIsDark(newDark);
   };
 
   return (
     <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', background: 'var(--color-card)', borderRight: '1px solid var(--color-card-border)', padding: '20px 12px' }}>
+      {/* Sidebar header: logo + hamburger toggle */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: collapsed ? 'center' : 'space-between', marginBottom: '28px', padding: '0 4px' }}>
         {!collapsed && (
           <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: '9px', textDecoration: 'none' }}>
@@ -112,6 +117,16 @@ function SidebarContent({ collapsed, setCollapsed, onClose }) {
             </div>
             <span style={{ fontSize: '14px', fontWeight: 700, color: 'var(--color-text-primary)' }}>BackToOwner</span>
           </Link>
+        )}
+        {/* Hamburger — toggles collapse on desktop */}
+        {setCollapsed && (
+          <button
+            onClick={() => setCollapsed(v => !v)}
+            title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+            style={{ background: 'none', border: 'none', color: 'var(--color-text-secondary)', cursor: 'pointer', padding: '4px', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+          >
+            <svg viewBox="0 0 24 24" fill="none" width="20" height="20"><path d="M3 12h18M3 6h18M3 18h18" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/></svg>
+          </button>
         )}
       </div>
 
@@ -131,8 +146,11 @@ function SidebarContent({ collapsed, setCollapsed, onClose }) {
 
       <div style={{ borderTop: '1px solid var(--color-card-border)', paddingTop: '12px', display:'flex', flexDirection:'column', gap:'8px' }}>
         <motion.button onClick={handleToggleTheme} whileHover={{ scale: 1.02 }} style={{ width: '100%', padding: '10px 14px', borderRadius: '12px', border: '1px solid var(--color-card-border)', background: 'transparent', color: 'var(--color-text-secondary)', display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer', justifyContent: collapsed ? 'center' : 'flex-start' }}>
-          <svg viewBox="0 0 24 24" fill="none" width="18" height="18"><path d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707m0-12.728l.707.707m11.314 11.314l.707.707M12 8a4 4 0 100 8 4 4 0 000-8z" stroke="currentColor" strokeWidth="2"/></svg>
-          {!collapsed && <span style={{ fontSize: '14px', fontWeight: 500 }}>Theme</span>}
+          {isDark
+            ? <svg viewBox="0 0 24 24" fill="none" width="18" height="18"><path d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707m0-12.728l.707.707m11.314 11.314l.707.707M12 8a4 4 0 100 8 4 4 0 000-8z" stroke="currentColor" strokeWidth="2"/></svg>
+            : <svg viewBox="0 0 24 24" fill="none" width="18" height="18"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+          }
+          {!collapsed && <span style={{ fontSize: '14px', fontWeight: 500 }}>{isDark ? 'Switch to Light' : 'Switch to Dark'}</span>}
         </motion.button>
         <motion.button onClick={handleLogout} whileHover={{ scale: 1.02 }} style={{ width: '100%', padding: '10px 14px', borderRadius: '12px', border: 'none', background: 'transparent', color: '#F43F5E', display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer', justifyContent: collapsed ? 'center' : 'flex-start' }}>
           <svg viewBox="0 0 24 24" fill="none" width="18" height="18"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9" stroke="currentColor" strokeWidth="2"/></svg>
@@ -161,8 +179,11 @@ export default function DashboardLayout({ children }) {
         )}
       </AnimatePresence>
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0 }}>
+        {/* Mobile top bar — hamburger toggles mobileOpen */}
         <div className="lg:hidden" style={{ height: '60px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 20px', background: 'var(--color-card)', borderBottom: '1px solid var(--color-card-border)' }}>
-          <button onClick={() => setMobileOpen(true)} style={{ background: 'none', border: 'none', color: 'var(--color-text-secondary)' }}><svg viewBox="0 0 24 24" fill="none" width="22" height="22"><path d="M3 12h18M3 6h18M3 18h18" stroke="currentColor" strokeWidth="2"/></svg></button>
+          <button onClick={() => setMobileOpen(v => !v)} style={{ background: 'none', border: 'none', color: 'var(--color-text-secondary)', cursor: 'pointer' }}>
+            <svg viewBox="0 0 24 24" fill="none" width="22" height="22"><path d="M3 12h18M3 6h18M3 18h18" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/></svg>
+          </button>
           <span style={{ fontSize:'15px', fontWeight: 700 }}>BackToOwner</span>
           <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: '#4F46E5', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff' }}>{user?.name?.charAt(0)}</div>
         </div>

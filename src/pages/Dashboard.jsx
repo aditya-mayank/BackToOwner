@@ -153,21 +153,22 @@ export default function Dashboard() {
       if (!user) return;
       const qId = user._id || user.userId || user.id;
       const [pRes, cRes] = await Promise.all([
-        itemsAPI.searchItems({ reportedBy: qId }),
-        itemsAPI.searchItems({})
+        itemsAPI.searchItems({ reportedBy: qId, status: 'all' }),
+        itemsAPI.searchItems({ status: 'all' })
       ]);
 
       const personalItems = pRes.results || [];
       const campusItems = cRes.results || [];
 
-      // Logic fix for personal stats
+      // Accurate Stats from DB
       const active = personalItems.filter(i => (i.status || '').toLowerCase() === 'active').length;
-      const resolved = personalItems.filter(i => (i.status || '').toLowerCase() === 'resolved').length;
+      const matched = personalItems.filter(i => (i.status || '').toLowerCase() === 'matched').length;
+      const resolved = campusItems.filter(i => (i.status || '').toLowerCase() === 'resolved').length;
       
       const creation = new Date(user.createdAt || Date.now());
       const days = Math.max(1, Math.floor((Date.now() - creation.getTime()) / (1000 * 3600 * 24)));
 
-      setDynamicStats({ active, matches: 0, resolved, daysActive: days });
+      setDynamicStats({ active, matches: matched, resolved, daysActive: days });
 
       const mappedActs = personalItems.slice(0, 6).map((item) => ({
         id: item._id,

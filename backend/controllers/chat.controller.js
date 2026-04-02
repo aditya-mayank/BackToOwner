@@ -1,5 +1,6 @@
 import Chat from '../models/Chat.model.js';
 import Item from '../models/Item.model.js';
+import { createInternalNotification } from './notification.controller.js';
 
 export const initiateChat = async (req, res) => {
   try {
@@ -129,9 +130,28 @@ export const closeChat = async (req, res) => {
     chat.closedAt = new Date();
     await chat.save();
 
-    // 4. Update both linked items
-    await Item.findByIdAndUpdate(chat.lostItemId, { status: 'resolved' });
-    await Item.findByIdAndUpdate(chat.foundItemId, { status: 'resolved' });
+    // 4. Update both linked items to resolved
+    const [lostItem, foundItem] = await Promise.all([
+      Item.findByIdAndUpdate(chat.lostItemId, { status: 'resolved' }, { new: true }),
+      Item.findByIdAndUpdate(chat.foundItemId, { status: 'resolved' }, { new: true })
+    ]);
+
+    // 5. Notify both participants
+    const otherParticipant = chat.participants.find(p => p.toString() !== userId.toString());
+    await createInternalNotification(
+      userId,
+      '✅ Item Returned!',
+      `Great news! The item has been marked as returned and resolved.`,
+      'info'
+    );
+    if (otherParticipant) {
+      await createInternalNotification(
+        otherParticipant,
+        '✅ Item Returned!',
+        `The chat has been closed. The item has been successfully returned.`,
+        'info'
+      );
+    }
 
     res.status(200).json({ success: true, message: 'Chat closed, item marked as returned' });
   } catch (error) {
