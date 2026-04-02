@@ -32,12 +32,12 @@ export const getAllItems = async (req, res) => {
 
 export const getAllUsers = async (req, res) => {
   try {
-    // 1. Fetch from DB
-    const users = await User.find().select('_id name email role accountStatus createdAt -passwordHash');
-
+    console.log('[Admin Service] Fetching all campus users...');
+    const users = await User.find().select('_id name email role accountStatus roll createdAt');
+    console.log(`[Admin Service] Successfully retrieved ${users.length} users.`);
     res.status(200).json({ success: true, count: users.length, users });
   } catch (error) {
-    console.error('Error in getAllUsers admin controller:', error.message);
+    console.error('[Admin Service ERROR] getAllUsers failed:', error);
     res.status(500).json({ success: false, message: 'Server Error' });
   }
 };
@@ -45,6 +45,7 @@ export const getAllUsers = async (req, res) => {
 export const blockUser = async (req, res) => {
   try {
     const { userId } = req.params;
+    const { status } = req.body; // Optional: specify 'active' or 'blocked'
 
     // 1. Fetch User
     const targetUser = await User.findById(userId);
@@ -53,22 +54,29 @@ export const blockUser = async (req, res) => {
       return res.status(404).json({ success: false, message: 'User not found' });
     }
 
-    // 2. Prevent blocking admins
+    // 2. Prevent modifying other admins
     if (targetUser.role === 'admin') {
-      return res.status(403).json({ success: false, message: 'Cannot block another admin' });
+      return res.status(403).json({ success: false, message: 'Cannot modify another admin account' });
     }
 
-    // 3. Block User
-    targetUser.accountStatus = 'blocked';
+    // 3. Update Status
+    const newStatus = status || (targetUser.accountStatus === 'active' ? 'blocked' : 'active');
+    targetUser.accountStatus = newStatus;
     await targetUser.save();
     
-    // 4. Close active chats involving user
-    await Chat.updateMany(
-      { participants: userId, status: 'active' },
-      { status: 'closed', closedAt: new Date() }
-    );
+    // 4. If blocking, close active chats
+    if (newStatus === 'blocked') {
+      await Chat.updateMany(
+        { participants: userId, status: 'active' },
+        { status: 'closed', closedAt: new Date() }
+      );
+    }
 
-    res.status(200).json({ success: true, message: 'User blocked and active chats closed', user: targetUser });
+    res.status(200).json({ 
+      success: true, 
+      message: `User account status updated to ${newStatus}`, 
+      user: targetUser 
+    });
   } catch (error) {
     console.error('Error in blockUser admin controller:', error.message);
     res.status(500).json({ success: false, message: 'Server Error' });
@@ -108,7 +116,7 @@ export const deleteOrArchiveItem = async (req, res) => {
 
 export const getSystemStats = async (req, res) => {
   try {
-    // 1. Fetch aggregations using Promise.all parallel queries
+    console.log('[Admin Service] Aggregating system statistics...');
     const [
       lostItems,
       foundItems,
@@ -133,10 +141,11 @@ export const getSystemStats = async (req, res) => {
       activeUsers,
       activeChats
     };
-
+    console.log(`[Admin Service] Compilation successful. Tracking ${resolvedItems} resolved student items.`);
+    console.log('[Admin Service] Stats generated:', stats);
     res.status(200).json({ success: true, stats });
   } catch (error) {
-    console.error('Error in getSystemStats admin controller:', error.message);
+    console.error('[Admin Service ERROR] getSystemStats failed:', error);
     res.status(500).json({ success: false, message: 'Server Error' });
   }
 };

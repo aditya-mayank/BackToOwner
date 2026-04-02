@@ -31,6 +31,11 @@ const userSchema = new mongoose.Schema(
     profilePicUrl: {
       type: String,
       default: null
+    },
+    roll: {
+      type: String,
+      trim: true,
+      default: null
     }
   },
   {
@@ -38,16 +43,11 @@ const userSchema = new mongoose.Schema(
   }
 );
 
-// Explicitly creating an index on the email field
-userSchema.index({ email: 1 });
-
-// Pre-save hook: The instruction specified to NOT re-hash the password, 
-// and only trim the name field.
-userSchema.pre('save', function (next) {
+// Pre-save hook: trim the name field (no password rehash here)
+userSchema.pre('save', function () {
   if (this.isModified('name') && this.name) {
     this.name = this.name.trim();
   }
-  next();
 });
 
 // Instance method to safely return user document without the passwordHash

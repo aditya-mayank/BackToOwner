@@ -6,7 +6,6 @@ import { Sun, Moon, Menu, X } from 'lucide-react'
 const NAV_LINKS = [
   { label: 'Home',         href: '#home' },
   { label: 'How It Works', href: '#how-it-works' },
-  { label: 'About',        href: '#about' },
 ]
 export default function Navbar({ isDark, toggleDark }) {
   const [scrolled,  setScrolled]  = useState(false)
@@ -101,6 +100,19 @@ export default function Navbar({ isDark, toggleDark }) {
                 {link.label}
               </motion.a>
             ))}
+            <motion.button
+              key="About"
+              onClick={() => navigate('/about')}
+              whileHover={{ color: '#4F46E5' }}
+              style={{
+                background: 'none', border: 'none',
+                fontSize: '14px', fontWeight: 500,
+                color: 'var(--color-text-secondary)',
+                cursor: 'pointer', transition: 'color 0.2s',
+              }}
+            >
+              About
+            </motion.button>
           </div>
           {/* Right Controls */}
             {/* Theme Toggle & CTA area */}
@@ -241,6 +253,18 @@ export default function Navbar({ isDark, toggleDark }) {
                   {link.label}
                 </a>
               ))}
+              <div 
+                onClick={() => { setMenuOpen(false); navigate('/about'); }}
+                style={{
+                  fontSize: '18px', fontWeight: 600,
+                  color: 'var(--color-text-primary)',
+                  padding: '8px 0',
+                  borderBottom: '1px solid rgba(255,255,255,0.03)',
+                  cursor: 'pointer'
+                }}
+              >
+                About
+              </div>
               {isLoggedIn ? (
                 <button
                   onClick={() => { setMenuOpen(false); navigate('/dashboard'); }}

@@ -149,7 +149,8 @@ export default function Register() {
       await authAPI.register({
         name: form.name,
         email: form.email,
-        password: form.password
+        password: form.password,
+        roll: form.roll
       })
       setLoading(false)
       triggerConfetti()

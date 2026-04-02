@@ -5,7 +5,7 @@ import User from '../models/User.model.js';
 
 export const register = async (req, res) => {
   try {
-    const { name, email, password } = req.body;
+    const { name, email, password, roll } = req.body;
 
     // 1. Basic Validation
     if (!name || !email || !password) {
@@ -37,6 +37,7 @@ export const register = async (req, res) => {
       name,
       email,
       passwordHash: hashedPassword,
+      roll: email === 'admin123@nitw.ac.in' ? null : (roll || null),
       role: email === 'admin123@nitw.ac.in' ? 'admin' : 'student'
     });
     await newUser.save();

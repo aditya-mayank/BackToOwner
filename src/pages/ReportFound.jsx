@@ -78,7 +78,7 @@ export default function ReportFound() {
   const [loading, setLoading] = useState(false)
   const [success, setSuccess] = useState(false)
   const fileInputRef = useRef(null)
-  const today = new Date().toISOString().slice(0, 16) // For datetime-local max
+  const today = new Date(new Date().getTime() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 16)
   const handlePhotoUpload = (file) => {
     if (!file) return
     if (!file.type.startsWith('image/')) {
@@ -151,7 +151,7 @@ export default function ReportFound() {
       if (loc === 'Others (specify below)') loc = data.customLocation;
       formData.append('location', loc);
       
-      // Found items don't have visibility exposed on UI, we lock to private natively (default true in DB)
+      formData.append('visibility', 'public');
       if (data.photo) formData.append('image', data.photo);
 
       await itemsAPI.reportFound(formData);
@@ -168,7 +168,7 @@ export default function ReportFound() {
   }
   return (
     <DashboardLayout>
-      <div style={{ maxWidth:'680px', margin:'0 auto' }}>
+      <div style={{ maxWidth:'680px', margin:'0 auto', width:'100%' }}>
         {/* Back link */}
         <motion.button
           initial={{ opacity:0, x:-10 }} animate={{ opacity:1, x:0 }}

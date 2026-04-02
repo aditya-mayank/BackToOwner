@@ -89,7 +89,10 @@ export default function Login() {
       login(dbResponse.user, dbResponse.token)
       setLoading(false)
       setSuccess(true)
-      const destination = location.state?.from || '/dashboard'
+      
+      const role = dbResponse.user?.role || 'student'
+      const destination = location.state?.from || (role === 'admin' ? '/admin' : '/dashboard')
+      
       setTimeout(() => navigate(destination), 800)
     } catch (err) {
       setLoading(false)

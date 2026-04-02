@@ -1,13 +1,8 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { useAuth } from '../context/AuthContext'
 import DashboardLayout from '../components/DashboardLayout'
-
-const STAT_ITEMS = [
-  { label: 'Reports Filed', value: '5', colorFrom: '#4F46E5', colorTo: '#6366F1', glow: 'rgba(79,70,229,0.25)' },
-  { label: 'Items Recovered', value: '2', colorFrom: '#10B981', colorTo: '#34D399', glow: 'rgba(16,185,129,0.25)' },
-  { label: 'Match Rate', value: '80%', colorFrom: '#F59E0B', colorTo: '#FBBF24', glow: 'rgba(245,158,11,0.25)' },
-]
+import { userAPI } from '../api/endpoints.js'
 
 const BADGE_ITEMS = [
   { label: 'Early Adopter', icon: '🚀', color: '#4F46E5' },
@@ -37,20 +32,54 @@ function InfoRow({ label, value, icon }) {
 }
 
 export default function Profile() {
-  const { user, logout } = useAuth()
+  const { logout } = useAuth()
+  const [userData, setUserData] = useState(null)
+  const [stats, setStats] = useState({
+    totalReports: 0,
+    resolvedReports: 0,
+    matchRate: '0%'
+  })
+  const [loading, setLoading] = useState(true)
   const [copied, setCopied] = useState(false)
 
+  useEffect(() => {
+    async function fetchProfile() {
+      try {
+        const res = await userAPI.getProfile()
+        if (res.success) {
+          setUserData(res.user)
+          setStats(res.stats)
+        }
+      } catch (err) {
+        console.error('Failed to fetch profile:', err)
+      } finally {
+        setLoading(false)
+      }
+    }
+    fetchProfile()
+  }, [])
+
   const handleCopyEmail = () => {
-    navigator.clipboard.writeText(user?.email || 'student@nitw.ac.in')
+    navigator.clipboard.writeText(userData?.email || '')
     setCopied(true)
     setTimeout(() => setCopied(false), 2000)
   }
 
-  const initials = user?.name?.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2) || 'U'
+  const initials = userData?.name?.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2) || 'U'
+
+  const STAT_ITEMS = [
+    { label: 'Reports Filed', value: stats.totalReports, colorFrom: '#4F46E5', colorTo: '#6366F1' },
+    { label: 'Items Recovered', value: stats.resolvedReports, colorFrom: '#10B981', colorTo: '#34D399' },
+    { label: 'Match Rate', value: stats.matchRate, colorFrom: '#F59E0B', colorTo: '#FBBF24' },
+  ]
+
+  if (loading) {
+    return <DashboardLayout><div style={{ padding:'40px', color:'var(--color-text-muted)' }}>Updating profile details...</div></DashboardLayout>
+  }
 
   return (
     <DashboardLayout>
-      <div style={{ maxWidth: '720px' }}>
+      <div style={{ maxWidth: '720px', margin: '0 auto' }}>
         {/* Page header */}
         <motion.div
           initial={{ opacity: 0, y: -12 }} animate={{ opacity: 1, y: 0 }}
@@ -97,18 +126,18 @@ export default function Profile() {
             {/* Name & role */}
             <div style={{ flex: 1 }}>
               <h2 style={{ fontSize: '24px', fontWeight: 800, letterSpacing: '-0.03em', color: 'var(--color-text-primary)', marginBottom: '4px' }}>
-                {user?.name || 'Student'}
+                {userData?.name || 'Student'}
               </h2>
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
                 <span style={{
                   display: 'inline-flex', alignItems: 'center', gap: '5px',
                   padding: '3px 12px', borderRadius: '8px', fontSize: '12px', fontWeight: 700,
-                  background: user?.role === 'admin' ? 'rgba(244,63,94,0.12)' : 'rgba(16,185,129,0.12)',
-                  color: user?.role === 'admin' ? '#F43F5E' : '#10B981',
-                  border: `1px solid ${user?.role === 'admin' ? 'rgba(244,63,94,0.3)' : 'rgba(16,185,129,0.3)'}`,
+                  background: userData?.role === 'admin' ? 'rgba(244,63,94,0.12)' : 'rgba(16,185,129,0.12)',
+                  color: userData?.role === 'admin' ? '#F43F5E' : '#10B981',
+                  border: `1px solid ${userData?.role === 'admin' ? 'rgba(244,63,94,0.3)' : 'rgba(16,185,129,0.3)'}`,
                   textTransform: 'capitalize',
                 }}>
-                  {user?.role === 'admin' ? '⚡' : '🎓'} {user?.role || 'student'}
+                  {userData?.role === 'admin' ? '⚡' : '🎓'} {userData?.role || 'student'}
                 </span>
                 <span style={{ fontSize: '13px', color: 'var(--color-text-muted)', fontWeight: 500 }}>NIT Warangal</span>
               </div>
@@ -170,10 +199,10 @@ export default function Profile() {
         >
           <h3 style={{ fontSize: '14px', fontWeight: 700, letterSpacing: '-0.01em', color: 'var(--color-text-primary)', marginBottom: '16px' }}>Account Information</h3>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-            <InfoRow label="Email Address" value={user?.email || 'student@nitw.ac.in'} icon="📧" />
-            <InfoRow label="Roll Number" value={user?.roll || '22CSB0001'} icon="🎓" />
+            <InfoRow label="Email Address" value={userData?.email || '—'} icon="📧" />
+            <InfoRow label="Roll Number" value={userData?.roll || '—'} icon="🎓" />
             <InfoRow label="Institution" value="NIT Warangal" icon="🏛️" />
-            <InfoRow label="Account Role" value={user?.role === 'admin' ? 'Administrator' : 'Student'} icon="🛡️" />
+            <InfoRow label="Account Role" value={userData?.role === 'admin' ? 'Administrator' : 'Student'} icon="🛡️" />
           </div>
         </motion.div>
 
@@ -205,6 +234,27 @@ export default function Profile() {
               </motion.div>
             ))}
           </div>
+        </motion.div>
+
+        {/* Sign Out */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.45, duration: 0.5 }}
+          style={{ marginTop: '20px' }}
+        >
+          <button 
+            onClick={logout}
+            style={{
+              width: '100%', padding: '16px', borderRadius: '16px',
+              background: 'transparent', border: '1px solid rgba(244,63,94,0.3)',
+              color: '#F43F5E', fontSize: '15px', fontWeight: 700,
+              cursor: 'pointer', transition: 'all 0.2s'
+            }}
+            onMouseEnter={e => e.currentTarget.style.background = 'rgba(244,63,94,0.05)'}
+            onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+          >
+            Sign Out of Account
+          </button>
         </motion.div>
       </div>
     </DashboardLayout>

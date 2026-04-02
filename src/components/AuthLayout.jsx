@@ -4,9 +4,9 @@ import { motion } from 'framer-motion'
 /* ─── Mini Dashboard Mockup (Left Panel) ────────────────────────────── */
 function DashboardMockup() {
   const items = [
-    { id: 1, name: 'Student ID Card', loc: 'CSE Department', time: '2h ago', status: 'matched', color: '#10B981' },
-    { id: 2, name: 'Blue Water Bottle', loc: 'IFC A (Institute Food Court)', time: '5h ago', status: 'searching', color: '#4F46E5' },
-    { id: 3, name: 'Laptop Charger', loc: 'Central Library', time: '1d ago', status: 'pending', color: '#F59E0B' },
+    { id: 1, name: 'Found: College ID Card', loc: 'CSE Dept', time: '2h ago', status: 'matched', color: '#10B981' },
+    { id: 2, name: 'Lost: Keys with keychain', loc: 'Mess Hall', time: '5h ago', status: 'searching', color: '#4F46E5' },
+    { id: 3, name: 'Found: Laptop Charger', loc: 'Main Library', time: '1d ago', status: 'pending', color: '#F59E0B' },
   ]
   return (
     <div style={{

@@ -22,7 +22,11 @@ import authRoutes from './routes/auth.routes.js';
 import itemRoutes from './routes/item.routes.js';
 import claimRoutes from './routes/claim.routes.js';
 import adminRoutes from './routes/admin.routes.js';
+import userRoutes from './routes/user.routes.js';
 import chatRoutes from './routes/chat.routes.js';
+import notificationRoutes from './routes/notification.routes.js';
+import bcrypt from 'bcryptjs';
+import User from './models/User.model.js';
 
 // Connect to Database
 await connectDB();
@@ -33,9 +37,12 @@ const app = express();
 app.set('trust proxy', 1);
 
 // CORS Configuration
-const allowedOrigins = process.env.CORS_ORIGIN 
-  ? process.env.CORS_ORIGIN.split(',').map(origin => origin.trim()) 
-  : ['http://localhost:5173'];
+const allowedOrigins = [
+  'http://localhost:5173',
+  'http://localhost:5174',
+  'http://localhost:3000',
+  process.env.CORS_ORIGIN
+].filter(Boolean);
 
 // Middleware
 app.use(globalLimiter); // Apply rate limiting globally
@@ -74,9 +81,11 @@ app.get('/api/health', (req, res) => {
 // API Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/items', itemRoutes);
+app.use('/api/users', userRoutes);
 app.use('/api/claims', claimRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/chat', chatRoutes);
+app.use('/api/notifications', notificationRoutes);
 
 // Catch-all 404 handler
 app.use((req, res, next) => {
@@ -93,26 +102,34 @@ app.use((err, req, res, next) => {
 const PORT = process.env.PORT || 5000;
 
 // Admin Auto-Seeder Utility
-import bcrypt from 'bcryptjs';
-import User from './models/User.model.js';
-
 const seedAdmin = async () => {
   try {
-    const adminExists = await User.findOne({ email: 'admin123@nitw.ac.in' });
-    if (!adminExists) {
-      console.log('[Seeder] No admin found. Generating pristine admin123@nitw.ac.in credentials natively...');
-      const salt = await bcrypt.genSalt(10);
-      const hashedPassword = await bcrypt.hash('admin123', salt);
+    const email = 'admin123@nitw.ac.in';
+    const adminUser = await User.findOne({ email });
+    
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash('admin123', salt);
+    
+    if (!adminUser) {
+      console.log('[Seeder] No admin found. Generating master credentials...');
       await new User({
         name: 'Master Admin',
-        email: 'admin123@nitw.ac.in',
+        email,
         passwordHash: hashedPassword,
-        role: 'admin'
+        role: 'admin',
+        accountStatus: 'active'
       }).save();
-      console.log('[Seeder] Admin credentials successfully generated.');
+      console.log('[Seeder] Master Admin created successfully.');
+    } else {
+      console.log('[Seeder] Admin found. Ensuring correct role & active status...');
+      adminUser.role = 'admin';
+      adminUser.accountStatus = 'active';
+      // Only reset password if it's a dev reset request (optional)
+      // adminUser.passwordHash = hashedPassword; 
+      await adminUser.save();
     }
   } catch (error) {
-    console.error('[Seeder ERROR] Failed to mock admin array natively:', error);
+    console.error('[Seeder ERROR] Failed to initialize admin:', error.message);
   }
 };
 

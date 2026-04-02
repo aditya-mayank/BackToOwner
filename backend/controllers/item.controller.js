@@ -2,10 +2,11 @@ import { uploadImage } from '../utils/cloudinary.js';
 import { extractKeywords, evaluateItemMatch } from '../utils/matchingEngine.js';
 import Item from '../models/Item.model.js';
 import { initiateChat } from './chat.controller.js';
+import { createInternalNotification } from './notification.controller.js';
 
 export const reportFoundItem = async (req, res) => {
   try {
-    const { title, description, category, location, dateLost } = req.body;
+    const { title, description, category, location, dateLost, visibility } = req.body;
 
     // 1. Validate required fields
     if (!title || !description || !category || !location) {
@@ -30,6 +31,7 @@ export const reportFoundItem = async (req, res) => {
     }
 
     // 4. Construct and Save Item
+    const itemVisibility = (visibility === 'private' || visibility === 'public') ? visibility : 'private';
     const savedItem = await new Item({
       reportedBy: req.user._id,
       title,
@@ -39,9 +41,17 @@ export const reportFoundItem = async (req, res) => {
       dateLost: dateLost || null,
       imageUrl,
       status: 'active',
-      visibility: 'private',
+      visibility: itemVisibility,
       type: 'found'
     }).save();
+
+    // Notify the user
+    await createInternalNotification(
+      req.user._id,
+      'Report Filed',
+      `You successfully reported a found ${category}: "${title}".`,
+      'info'
+    );
 
     // 5. Matching logic
     const lostItems = await Item.find({ type: 'lost', status: 'active' });
@@ -51,12 +61,18 @@ export const reportFoundItem = async (req, res) => {
       const matchResult = evaluateItemMatch(savedItem, lostItem);
       if (matchResult.score >= 70) {
         matchesFound++;
+        
+        // Notify both parties
+        await createInternalNotification(req.user._id, 'Potential Match!', `Your found item "${title}" matches a lost report.`, 'match');
+        await createInternalNotification(lostItem.reportedBy, 'Item Found!', `Someone found an item matching your lost report: "${lostItem.title}".`, 'match');
+
         const mockReq = {
           body: {
             lostItemId: lostItem._id,
             foundItemId: savedItem._id,
             loserId: lostItem.reportedBy,
-            finderId: savedItem.reportedBy
+            finderId: savedItem.reportedBy,
+            matchScore: matchResult.score
           }
         };
         const mockRes = { status: () => ({ json: () => {} }) };
@@ -121,14 +137,27 @@ export const reportLostItem = async (req, res) => {
       type: 'lost'
     }).save();
 
+    // Notify the user
+    await createInternalNotification(
+      req.user._id,
+      'Report Filed',
+      `You successfully reported a lost ${category}: "${title}". It is now ${itemVisibility}.`,
+      'info'
+    );
+
     // 6. Matching logic
-    const foundItems = await Item.find({ type: 'found', status: 'active', visibility: 'private' });
+    const foundItems = await Item.find({ type: 'found', status: 'active' });
     const matches = [];
 
     for (const foundItem of foundItems) {
       const matchResult = evaluateItemMatch(savedItem, foundItem);
       if (matchResult.score >= 70) {
         matches.push({ foundItemId: foundItem._id, score: matchResult.score });
+
+        // Notify both parties
+        await createInternalNotification(req.user._id, 'Potential Match!', `Your lost item "${title}" matches a found report.`, 'match');
+        await createInternalNotification(foundItem.reportedBy, 'Match Found!', `Someone reported an item matching your found report: "${savedItem.title}".`, 'match');
+
         const mockReq = {
           body: {
             lostItemId: savedItem._id,
@@ -158,10 +187,17 @@ export const reportLostItem = async (req, res) => {
 
 export const searchItems = async (req, res) => {
   try {
-    const { category, location, keyword } = req.query;
+    const { category, location, keyword, reportedBy } = req.query;
 
     // 1. Construct Query
-    const query = { status: 'active', visibility: 'public' };
+    // Default to active+public, BUT if specifically searching by user, show all their items
+    const query = {};
+    if (reportedBy) {
+      query.reportedBy = reportedBy;
+    } else {
+      query.status = 'active';
+      query.visibility = 'public';
+    }
     
     if (category) {
       query.category = category;

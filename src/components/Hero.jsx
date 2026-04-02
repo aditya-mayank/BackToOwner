@@ -355,7 +355,13 @@ export default function Hero() {
             }}
           >
             AI-powered matching for NIT Warangal students. Report lost items,
-            connect with finders, and get your belongings back — fast.
+            connect with finders, and get your belongings back — fast. {' '}
+            <span 
+              onClick={() => navigate('/about')}
+              style={{ color: '#4F46E5', fontWeight: 600, cursor: 'pointer', textDecoration: 'underline', textUnderlineOffset: '4px' }}
+            >
+              Learn more about how it works →
+            </span>
           </motion.p>
           {/* CTA Buttons */}
           <motion.div

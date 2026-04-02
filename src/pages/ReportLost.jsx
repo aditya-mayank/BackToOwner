@@ -256,7 +256,7 @@ function Step2({ data, setData }) {
   const [focusLoc,  setFocusLoc]  = useState(false)
   const [focusDate, setFocusDate] = useState(false)
   const [showTip,   setShowTip]   = useState(false)
-  const today = new Date().toISOString().split('T')[0]
+  const today = new Date(new Date().getTime() - new Date().getTimezoneOffset() * 60000).toISOString().split('T')[0]
   return (
     <div>
       <h2 style={{ fontSize:'22px', fontWeight:800, letterSpacing:'-0.03em', color:'var(--color-text-primary)', marginBottom:'4px' }}>Where & when did you lose it?</h2>
@@ -558,7 +558,7 @@ export default function ReportLost() {
   }
   return (
     <DashboardLayout>
-      <div style={{ maxWidth:'680px' }}>
+      <div style={{ maxWidth:'680px', margin: '0 auto', width:'100%' }}>
         {/* Back link */}
         <motion.button
           initial={{ opacity:0, x:-10 }} animate={{ opacity:1, x:0 }}

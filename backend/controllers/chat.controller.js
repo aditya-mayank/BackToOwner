@@ -139,3 +139,17 @@ export const closeChat = async (req, res) => {
     res.status(500).json({ success: false, message: 'Server Error' });
   }
 };
+
+export const getUserChats = async (req, res) => {
+  try {
+    const userId = req.user._id;
+    const chats = await Chat.find({
+      participants: userId
+    }).populate('participants', 'name email').populate('lostItemId foundItemId', 'title category location');
+    
+    res.status(200).json({ success: true, chats });
+  } catch (error) {
+    console.error('Error in getUserChats controller:', error.message);
+    res.status(500).json({ success: false, message: 'Server Error' });
+  }
+};

@@ -61,8 +61,28 @@ export const itemsAPI = {
   }
 };
 
+// --- User Endpoints ---
+export const userAPI = {
+  getProfile: async () => {
+    try {
+      const response = await axiosClient.get('/users/profile');
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  }
+};
+
 // --- Chat Endpoints ---
 export const chatAPI = {
+  getUserChats: async () => {
+    try {
+      const response = await axiosClient.get('/chat');
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  },
   getMessages: async (chatId) => {
     try {
       const response = await axiosClient.get(`/chat/${chatId}/messages`);
@@ -127,6 +147,26 @@ export const adminAPI = {
     try {
       // action will be sent as ?action=delete/archive
       const response = await axiosClient.delete(`/admin/items/${itemId}`, { params: { action } });
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  }
+};
+
+// --- Notification Endpoints ---
+export const notificationAPI = {
+  getMy: async () => {
+    try {
+      const response = await axiosClient.get('/notifications/my');
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  },
+  markRead: async (id) => {
+    try {
+      const response = await axiosClient.put(`/notifications/${id}/read`);
       return response.data;
     } catch (error) {
       throw error;

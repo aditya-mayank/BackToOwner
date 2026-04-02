@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import DashboardLayout from '../components/DashboardLayout'
+import { notificationAPI } from '../api/endpoints.js'
+
 /* ─── Confetti ───────────────────────────────────────────────────────── */
 function triggerConfetti() {
   const colors = ['#4F46E5','#10B981','#F43F5E','#F59E0B','#8B5CF6','#06B6D4']
@@ -18,139 +20,39 @@ function triggerConfetti() {
     .onfinish = () => el.remove()
   }
 }
-/* ─── Mock Data ──────────────────────────────────────────────────────── */
-const INITIAL_NOTIFS = [
-  {
-    id: 1, type: 'match', read: false, timeAgo: '2 mins ago',
-    title: 'Match Found: Grey Nike Backpack',
-    desc: 'Our AI has identified a highly probable match for your lost item.',
-    matchDetails: {
-      score: 85,
-      yours: { category: '🎒 Bags', location: 'Library', date: '28 Mar 2026' },
-      theirs: { category: '🎒 Bags', location: 'Library', date: '28 Mar 2026' }
-    }
-  },
-  {
-    id: 2, type: 'system', read: false, timeAgo: '1 day ago',
-    title: 'Report Published',
-    desc: 'Your "Grey Nike Backpack" lost report is now active globally.'
-  },
-  {
-    id: 3, type: 'system', read: true, timeAgo: '3 days ago',
-    title: 'Welcome to BackToOwner!',
-    desc: 'Thanks for joining NITW\'s smart campus recovery system!'
-  }
-]
-/* ─── Circular Score Ring ────────────────────────────────────────────── */
-function ScoreRing({ score }) {
-  const [current, setCurrent] = useState(0)
-  useEffect(() => {
-    let start = 0
-    const end = score
-    if (start === end) return
-    const ms = 20
-    const stepTime = Math.abs(Math.floor(ms / end))
-    const timer = setInterval(() => {
-      start += 1
-      setCurrent(start)
-      if (start === end) clearInterval(timer)
-    }, stepTime)
-    return () => clearInterval(timer)
-  }, [score])
-  const radius = 30
-  const circumference = 2 * Math.PI * radius
-  const strokeOffset = circumference - (current / 100) * circumference
-  return (
-    <div style={{ position:'relative', width:'80px', height:'80px', display:'flex', alignItems:'center', justifyContent:'center' }}>
-      <svg width="80" height="80" style={{ position:'absolute', transform:'rotate(-90deg)' }}>
-        <circle cx="40" cy="40" r={radius} fill="none" stroke="rgba(16,185,129,0.15)" strokeWidth="6" />
-        <motion.circle
-          cx="40" cy="40" r={radius} fill="none" stroke="#10B981" strokeWidth="6"
-          strokeLinecap="round" strokeDasharray={circumference}
-          initial={{ strokeDashoffset: circumference }}
-          animate={{ strokeDashoffset: strokeOffset }}
-          transition={{ duration: 1.5, ease: "easeOut" }}
-        />
-      </svg>
-      <div style={{ display:'flex', flexDirection:'column', alignItems:'center' }}>
-        <span style={{ fontSize:'20px', fontWeight:800, color:'#34D399', lineHeight:1 }}>{current}<span style={{fontSize:'12px'}}>%</span></span>
-        <span style={{ fontSize:'9px', fontWeight:700, textTransform:'uppercase', letterSpacing:'0.05em', color:'var(--color-text-muted)' }}>Match</span>
-      </div>
-    </div>
-  )
-}
+
 /* ─── Match Alert Card (SPECIAL!) ────────────────────────────────────── */
 function MatchAlertCard({ notif }) {
   const navigate = useNavigate()
   useEffect(() => {
-    if (!notif.read) triggerConfetti()
-  }, [notif.read])
-  const { yours, theirs, score } = notif.matchDetails
+    if (notif.status === 'unread') triggerConfetti()
+  }, [notif.status])
+
   return (
     <motion.div
       initial={{ opacity:0, scale:0.95, y:20 }} animate={{ opacity:1, scale:1, y:0 }}
       style={{
         background:'rgba(16,185,129,0.04)', borderRadius:'24px', position:'relative', overflow:'hidden',
         border:'1px solid rgba(16,185,129,0.25)', boxShadow:'0 12px 40px rgba(0,0,0,0.3)',
-        padding:'32px', marginBottom:'32px', display:'flex', flexDirection:'column', gap:'24px'
+        padding:'32px', marginBottom:'32px', display:'flex', flexDirection:'column', gap:'16px'
       }}
     >
-      {/* Glow */}
-      <div style={{ position:'absolute', top:'-60px', right:'-60px', width:'200px', height:'200px', borderRadius:'50%', background:'rgba(16,185,129,0.15)', filter:'blur(50px)', pointerEvents:'none' }} />
-      {/* Header */}
-      <div className="match-header-row" style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', position:'relative', zIndex:1 }}>
-        <div style={{ display:'flex', alignItems:'center', gap:'16px' }}>
-          <div style={{ width:'56px', height:'56px', borderRadius:'16px', background:'linear-gradient(135deg,#10B981,#059669)', display:'flex', alignItems:'center', justifyContent:'center', boxShadow:'0 0 24px rgba(16,185,129,0.5)', color:'#fff' }}>
-            <svg viewBox="0 0 24 24" fill="none" width="28" height="28"><path d="M5 13l4 4L19 7" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/></svg>
-          </div>
-          <div>
-            <h2 style={{ fontSize:'24px', fontWeight:800, color:'#10B981', letterSpacing:'-0.03em', marginBottom:'4px' }}>We found a potential match!</h2>
-            <p style={{ fontSize:'14px', color:'var(--color-text-secondary)' }}>{notif.title}</p>
-          </div>
+      <div style={{ display:'flex', alignItems:'center', gap:'16px' }}>
+        <div style={{ width:'56px', height:'56px', borderRadius:'16px', background:'linear-gradient(135deg,#10B981,#059669)', display:'flex', alignItems:'center', justifyContent:'center', color:'#fff' }}>
+          <svg viewBox="0 0 24 24" fill="none" width="28" height="28"><path d="M5 13l4 4L19 7" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/></svg>
         </div>
-        <ScoreRing score={score} />
-      </div>
-      {/* Info Rows Side-by-Side */}
-      <div className="match-grid-2" style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'16px', position:'relative', zIndex:1 }}>
-        {/* Your Item */}
-        <div style={{ background:'var(--color-card)', padding:'20px', borderRadius:'16px', border:'1px dashed rgba(255,255,255,0.1)' }}>
-          <p style={{ fontSize:'12px', fontWeight:700, textTransform:'uppercase', letterSpacing:'0.05em', color:'var(--color-text-muted)', marginBottom:'12px' }}>Your Lost Report</p>
-          <div style={{ display:'flex', flexDirection:'column', gap:'8px' }}>
-            <div style={{ display:'flex', justifyContent:'space-between' }}><span style={{fontSize:'13px', color:'var(--color-text-secondary)'}}>Category</span><span style={{fontSize:'13px', fontWeight:600, color:'var(--color-text-primary)'}}>{yours.category}</span></div>
-            <div style={{ display:'flex', justifyContent:'space-between' }}><span style={{fontSize:'13px', color:'var(--color-text-secondary)'}}>Location</span><span style={{fontSize:'13px', fontWeight:600, color:'var(--color-text-primary)'}}>{yours.location}</span></div>
-            <div style={{ display:'flex', justifyContent:'space-between' }}><span style={{fontSize:'13px', color:'var(--color-text-secondary)'}}>Date</span><span style={{fontSize:'13px', fontWeight:600, color:'var(--color-text-primary)'}}>{yours.date}</span></div>
-          </div>
-        </div>
-        {/* Their Item */}
-        <div style={{ background:'var(--color-card)', padding:'20px', borderRadius:'16px', border:'1px dashed rgba(16,185,129,0.3)' }}>
-          <p style={{ fontSize:'12px', fontWeight:700, textTransform:'uppercase', letterSpacing:'0.05em', color:'#34D399', marginBottom:'12px' }}>Matched Found Item</p>
-          <div style={{ display:'flex', flexDirection:'column', gap:'8px' }}>
-            <div style={{ display:'flex', justifyContent:'space-between' }}><span style={{fontSize:'13px', color:'var(--color-text-secondary)'}}>Category</span><span style={{fontSize:'13px', fontWeight:600, color:'var(--color-text-primary)'}}>{theirs.category}</span></div>
-            <div style={{ display:'flex', justifyContent:'space-between' }}><span style={{fontSize:'13px', color:'var(--color-text-secondary)'}}>Location</span><span style={{fontSize:'13px', fontWeight:600, color:'var(--color-text-primary)'}}>{theirs.location}</span></div>
-            <div style={{ display:'flex', justifyContent:'space-between' }}><span style={{fontSize:'13px', color:'var(--color-text-secondary)'}}>Date</span><span style={{fontSize:'13px', fontWeight:600, color:'var(--color-text-primary)'}}>{theirs.date}</span></div>
-          </div>
+        <div>
+          <h2 style={{ fontSize:'20px', fontWeight:800, color:'#10B981', letterSpacing:'-0.03em', marginBottom:'4px' }}>Match Update!</h2>
+          <p style={{ fontSize:'14px', color:'var(--color-text-secondary)' }}>{notif.message}</p>
         </div>
       </div>
-      {/* Privacy Lock Banner */}
-      <div style={{ display:'flex', alignItems:'center', justifyContent:'center', gap:'8px', padding:'12px', borderRadius:'12px', background:'rgba(245,158,11,0.08)', border:'1px solid rgba(245,158,11,0.2)', position:'relative', zIndex:1 }}>
-        <svg viewBox="0 0 24 24" fill="none" width="16" height="16" color="#F59E0B"><rect x="5" y="11" width="14" height="10" rx="2" stroke="currentColor" strokeWidth="2"/><path d="M8 11V7a4 4 0 018 0v4" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/></svg>
-        <span style={{ fontSize:'13px', fontWeight:600, color:'#F59E0B' }}>Finder identity protected until you connect.</span>
-      </div>
-      {/* Buttons */}
-      <div className="match-action-row" style={{ display:'flex', gap:'12px', position:'relative', zIndex:1 }}>
-        <motion.button
-          onClick={() => navigate('/chat/123')}
-          whileHover={{ scale:1.02 }} whileTap={{ scale:0.98 }}
-          style={{ flex:1, padding:'16px', borderRadius:'12px', border:'none', background:'linear-gradient(135deg,#4F46E5,#6366F1)', color:'#fff', fontSize:'15px', fontWeight:800, cursor:'pointer', boxShadow:'0 4px 20px rgba(79,70,229,0.4)' }}
+      <div style={{ display:'flex', gap:'12px' }}>
+        <button 
+          onClick={() => navigate('/chats')}
+          style={{ flex:1, padding:'12px', borderRadius:'12px', border:'none', background:'#4F46E5', color:'#fff', fontWeight:700, cursor:'pointer' }}
         >
-          Open Secure Chat
-        </motion.button>
-        <motion.button
-          whileHover={{ scale:1.02 }} whileTap={{ scale:0.98 }}
-          style={{ padding:'16px 24px', borderRadius:'12px', border:'1px solid rgba(255,255,255,0.1)', background:'var(--color-card)', color:'var(--color-text-secondary)', fontSize:'14px', fontWeight:600, cursor:'pointer' }}
-        >
-          Not a match? Report this.
-        </motion.button>
+          Go to Chat
+        </button>
       </div>
     </motion.div>
   )
@@ -158,12 +60,13 @@ function MatchAlertCard({ notif }) {
 /* ─── Standard Notification Card ─────────────────────────────────────── */
 function NotificationCard({ notif, onMarkRead }) {
   const isMatch = notif.type === 'match'
+  const isRead = notif.status === 'read'
   return (
     <div
-      onClick={() => { if(!notif.read) onMarkRead(notif.id) }}
+      onClick={() => { if(!isRead) onMarkRead(notif._id) }}
       style={{
         display:'flex', gap:'16px', padding:'20px', borderRadius:'16px', cursor:'pointer',
-        background: notif.read ? 'transparent' : 'var(--color-card)',
+        background: isRead ? 'transparent' : 'var(--color-card)',
         borderLeft: `4px solid ${isMatch ? '#10B981' : '#4F46E5'}`,
         borderTop: '1px solid rgba(255,255,255,0.05)',
         borderRight: '1px solid rgba(255,255,255,0.05)',
@@ -171,7 +74,6 @@ function NotificationCard({ notif, onMarkRead }) {
         transition:'all .2s'
       }}
     >
-      {/* Icon */}
       <div style={{
         width:'40px', height:'40px', borderRadius:'10px', flexShrink:0, display:'flex', alignItems:'center', justifyContent:'center',
         background: isMatch ? 'rgba(16,185,129,0.15)' : 'rgba(79,70,229,0.15)',
@@ -184,20 +86,10 @@ function NotificationCard({ notif, onMarkRead }) {
       </div>
       <div style={{ flex:1 }}>
         <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', marginBottom:'4px' }}>
-          <h3 style={{ fontSize:'15px', fontWeight:notif.read ? 600 : 700, color:'var(--color-text-primary)', display:'flex', alignItems:'center', gap:'8px' }}>
-            {notif.title}
-            {!notif.read && (
-              <motion.div
-                animate={{ scale:[1,1.5,1], opacity:[1,0.5,1] }} transition={{ duration:2, repeat:Infinity }}
-                style={{ width:'8px', height:'8px', borderRadius:'50%', background:'#4F46E5' }}
-              />
-            )}
-          </h3>
-          <span style={{ fontSize:'12px', color:'var(--color-text-muted)', whiteSpace:'nowrap' }}>{notif.timeAgo}</span>
+          <h3 style={{ fontSize:'15px', fontWeight:isRead ? 600 : 700, color:'var(--color-text-primary)' }}>{notif.title}</h3>
+          <span style={{ fontSize:'11px', color:'var(--color-text-muted)' }}>{new Date(notif.createdAt).toLocaleDateString()}</span>
         </div>
-        <p style={{ fontSize:'13px', color:'var(--color-text-secondary)', lineHeight:1.5 }}>
-          {notif.desc}
-        </p>
+        <p style={{ fontSize:'13px', color:'var(--color-text-secondary)', lineHeight:1.5 }}>{notif.message}</p>
       </div>
     </div>
   )
@@ -205,24 +97,42 @@ function NotificationCard({ notif, onMarkRead }) {
 /* ─── Main Page Component ────────────────────────────────────────────── */
 export default function Notifications() {
   const [activeTab, setActiveTab] = useState('All')
-  const [notifs, setNotifs] = useState(INITIAL_NOTIFS)
-  const TABS = ['All', 'Matches', 'System', 'Read']
+  const [notifs, setNotifs] = useState([])
+  const [loading, setLoading] = useState(true)
+
+  const fetchNotifs = async () => {
+    try {
+      const res = await notificationAPI.getMy()
+      if (res.success) setNotifs(res.notifications)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    fetchNotifs()
+  }, [])
+
+  const markRead = async (id) => {
+    try {
+      setNotifs(prev => prev.map(n => n._id === id ? { ...n, status: 'read' } : n))
+      await notificationAPI.markRead(id)
+    } catch (err) {
+      console.error('Failed to mark as read:', err)
+    }
+  }
+
   const filtered = notifs.filter(n => {
     if (activeTab === 'Matches') return n.type === 'match'
-    if (activeTab === 'System') return n.type === 'system'
-    if (activeTab === 'Read') return n.read === true
+    if (activeTab === 'Unread') return n.status === 'unread'
+    if (activeTab === 'Read') return n.status === 'read'
     return true
   })
-  // Extract top unread match for the special card, if activeTab is 'All' or 'Matches'
-  const specialMatch = filtered.find(n => n.type === 'match' && !n.read)
-  // The rest of the list
-  const listItems = specialMatch ? filtered.filter(n => n.id !== specialMatch.id) : filtered
-  const markAllRead = () => {
-    setNotifs(notifs.map(n => ({ ...n, read: true })))
-  }
-  const markRead = (id) => {
-    setNotifs(notifs.map(n => n.id === id ? { ...n, read: true } : n))
-  }
+
+  const specialMatch = filtered.find(n => n.type === 'match' && n.status === 'unread')
+  const listItems = specialMatch ? filtered.filter(n => n._id !== specialMatch._id) : filtered
+  const TABS = ['All', 'Matches', 'Unread', 'Read']
+
   return (
     <DashboardLayout>
       <div style={{ maxWidth:'760px', margin:'0 auto' }}>
@@ -232,17 +142,8 @@ export default function Notifications() {
             <h1 style={{ fontSize:'clamp(24px,3vw,32px)', fontWeight:800, letterSpacing:'-0.03em', color:'var(--color-text-primary)' }}>
               Notifications
             </h1>
-            <p style={{ fontSize:'14px', color:'var(--color-text-secondary)' }}>You have <strong style={{color:'#fff'}}>{notifs.filter(n=>!n.read).length}</strong> unread messages.</p>
+            <p style={{ fontSize:'14px', color:'var(--color-text-secondary)' }}>You have <strong style={{color:'#fff'}}>{notifs.filter(n=>n.status==='unread').length}</strong> unread messages.</p>
           </div>
-          <button
-            id="mark-all-read-btn"
-            onClick={markAllRead}
-            style={{ padding:'8px 16px', background:'rgba(255,255,255,0.05)', border:'1px solid rgba(255,255,255,0.1)', borderRadius:'8px', color:'var(--color-text-secondary)', fontSize:'13px', fontWeight:600, cursor:'pointer', transition:'all .2s' }}
-            onMouseEnter={e => { e.currentTarget.style.color='#fff'; e.currentTarget.style.background='rgba(255,255,255,0.1)' }}
-            onMouseLeave={e => { e.currentTarget.style.color='var(--color-text-secondary)'; e.currentTarget.style.background='rgba(255,255,255,0.05)' }}
-          >
-            Mark all as read
-          </button>
         </div>
         {/* Tabs */}
         <div className="tabs-row" style={{ display:'flex', gap:'8px', marginBottom:'32px', borderBottom:'1px solid rgba(255,255,255,0.1)', paddingBottom:'16px' }}>

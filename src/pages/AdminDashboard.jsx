@@ -1,26 +1,8 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
-/* ─── Mock Data ──────────────────────────────────────────────────────── */
-const STATS = [
-  { label: 'Total Active Reports', value: '142' },
-  { label: 'Matches Today', value: '18', color: '#10B981' },
-  { label: 'Flagged Reports', value: '3', color: '#F59E0B' },
-  { label: 'Users Blocked', value: '5', color: '#F43F5E' },
-]
-const MOCK_REPORTS = Array.from({ length: 12 }).map((_, i) => ({
-  id: `rep-${i}`,
-  student: i % 2 === 0 ? 'Arjun Reddy' : 'Sneha Sharma',
-  item: i % 3 === 0 ? 'BoAt AirPods' : 'MacBook Charger',
-  status: i % 4 === 0 ? 'Matched' : 'Active',
-  score: i % 4 === 0 ? (70 + (i * 2)) : '-',
-  date: `2${i} Mar 2026`,
-}))
-const MOCK_USERS = [
-  { id: 'u1', name: 'Arjun Reddy', roll: '22CSB0001', email: 'arjun@nitw.ac.in', status: 'active' },
-  { id: 'u2', name: 'Sneha Sharma', roll: '22EE0042', email: 'sneha@nitw.ac.in', status: 'blocked' },
-  { id: 'u3', name: 'Ravi Teja', roll: '21ME0104', email: 'ravi@nitw.ac.in', status: 'active' },
-]
+import { adminAPI } from '../api/endpoints.js'
+
 /* ─── Skeletons ──────────────────────────────────────────────────────── */
 function SkeletonRow() {
   return (
@@ -31,11 +13,12 @@ function SkeletonRow() {
     </div>
   )
 }
+
 /* ─── Toggle Switch ──────────────────────────────────────────────────── */
 function ToggleSwitch({ active, onChange }) {
   return (
     <div
-      onClick={onChange}
+      onClick={(e) => { e.stopPropagation(); onChange(); }}
       style={{
         width:'40px', height:'24px', borderRadius:'12px', background: active ? '#10B981' : 'rgba(255,255,255,0.1)',
         display:'flex', alignItems:'center', padding:'2px', cursor:'pointer', transition:'background 0.3s'
@@ -49,25 +32,88 @@ function ToggleSwitch({ active, onChange }) {
     </div>
   )
 }
+
 /* ─── Main Component ─────────────────────────────────────────────────── */
 export default function AdminDashboard() {
   const navigate = useNavigate()
   const [loading, setLoading] = useState(true)
   const [activeTab, setActiveTab] = useState('Reports')
-  const [users, setUsers] = useState(MOCK_USERS)
-  useEffect(() => {
-    // Simulate initial data fetch
-    const timer = setTimeout(() => {
-      setLoading(false)
-    }, 1200)
-    return () => clearTimeout(timer)
-  }, [])
-  const toggleUserStatus = (id) => {
-    setUsers(users.map(u => {
-      if (u.id === id) return { ...u, status: u.status === 'active' ? 'blocked' : 'active' }
-      return u
-    }))
+  const [users, setUsers] = useState([])
+  const [items, setItems] = useState([])
+  const [error, setError] = useState(null)
+  const [stats, setStats] = useState({
+    activeItems: 0,
+    resolvedItems: 0,
+    activeUsers: 0,
+    activeChats: 0
+  })
+  const [selectedItem, setSelectedItem] = useState(null)
+  const [viewModalOpen, setViewModalOpen] = useState(false)
+
+  // Fetch all data
+  const fetchData = async () => {
+    setLoading(true)
+    setError(null)
+    
+    // Separate fetchers for better error isolation
+    const fetchStats = async () => {
+      try {
+        const data = await adminAPI.getStats()
+        if (data.success) setStats(data.stats)
+      } catch (err) {
+        console.error('Stats Fetch Error:', err)
+      }
+    }
+
+    const fetchUsers = async () => {
+      try {
+        const data = await adminAPI.getAllUsers()
+        if (data.success) setUsers(data.users || [])
+      } catch (err) {
+        console.error('Users Fetch Error:', err)
+        setError('Users list could not be loaded. Please ensure you have admin privileges.')
+      }
+    }
+
+    const fetchItems = async () => {
+      try {
+        const data = await adminAPI.getAllItems()
+        if (data.success) setItems(data.items || [])
+      } catch (err) {
+        console.error('Items Fetch Error:', err)
+      }
+    }
+
+    // Run them in parallel but handle independently
+    await Promise.allSettled([fetchStats(), fetchUsers(), fetchItems()])
+    setLoading(false)
   }
+
+  useEffect(() => {
+    fetchData()
+  }, [])
+
+  const toggleUserStatus = async (userId, currentStatus) => {
+    try {
+      const newStatus = currentStatus === 'active' ? 'blocked' : 'active'
+      setUsers(prev => prev.map(u => u._id === userId ? { ...u, accountStatus: newStatus } : u))
+      
+      await adminAPI.blockUser(userId)
+      fetchData()
+    } catch (err) {
+      console.error('Failed to toggle user status:', err)
+      setError('Failed to update user status.')
+      fetchData() 
+    }
+  }
+
+  const statsDisplay = [
+    { label: 'Active Reports', value: stats.activeItems || 0 },
+    { label: 'Total Resolved', value: stats.resolvedItems || 0, color: '#10B981' },
+    { label: 'Active Users', value: stats.activeUsers || 0, color: '#F59E0B' },
+    { label: 'Open Chats', value: stats.activeChats || 0, color: '#F43F5E' },
+  ]
+
   return (
     <div style={{ minHeight:'100vh', background:'var(--color-bg)', display:'flex', flexDirection:'column' }}>
       {/* Navbar */}
@@ -76,23 +122,56 @@ export default function AdminDashboard() {
           <div style={{ padding:'6px 10px', background:'rgba(244,63,94,0.1)', color:'#F43F5E', borderRadius:'8px', fontSize:'12px', fontWeight:800, textTransform:'uppercase', border:'1px solid rgba(244,63,94,0.3)' }}>Admin Portal</div>
           <h1 style={{ fontSize:'20px', fontWeight:800, color:'var(--color-text-primary)' }}>BackToOwner</h1>
         </div>
-        <button onClick={() => navigate('/dashboard')} style={{ background:'transparent', border:'1px solid rgba(255,255,255,0.1)', borderRadius:'12px', padding:'8px 16px', color:'var(--color-text-secondary)', cursor:'pointer' }} onMouseEnter={e=>e.currentTarget.style.color='#fff'} onMouseLeave={e=>e.currentTarget.style.color='var(--color-text-secondary)'}>
-          Exit Admin
-        </button>
+        <div style={{ display:'flex', gap:'12px', alignItems:'center' }}>
+          {/* Theme Toggle */}
+          <button 
+            id="admin-theme-toggle"
+            onClick={() => {
+              const root = document.documentElement;
+              const isDark = root.classList.contains('dark');
+              const newMode = isDark ? 'light' : 'dark';
+              root.classList.toggle('dark',  newMode === 'dark');
+              root.classList.toggle('light', newMode === 'light');
+              localStorage.setItem('backtoowner-theme', newMode);
+            }} 
+            style={{ background:'rgba(255,255,255,0.05)', border:'1px solid rgba(255,255,255,0.1)', borderRadius:'12px', width:'40px', height:'40px', display:'flex', alignItems:'center', justifyContent:'center', color:'#fff', cursor:'pointer' }}
+          >
+            <svg viewBox="0 0 24 24" fill="none" width="18" height="18"><path d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707m0-12.728l.707.707m11.314 11.314l.707.707M12 8a4 4 0 100 8 4 4 0 000-8z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+          </button>
+          <button onClick={fetchData} style={{ background:'rgba(255,255,255,0.05)', border:'1px solid rgba(255,255,255,0.1)', borderRadius:'12px', padding:'8px 16px', color:'#fff', cursor:'pointer', fontSize:'13px', fontWeight:600 }}>Refresh Data</button>
+          <button onClick={() => navigate('/dashboard')} style={{ background:'transparent', border:'1px solid rgba(255,255,255,0.1)', borderRadius:'12px', padding:'8px 16px', color:'var(--color-text-secondary)', cursor:'pointer' }} onMouseEnter={e=>e.currentTarget.style.color='#fff'} onMouseLeave={e=>e.currentTarget.style.color='var(--color-text-secondary)'}>
+            Exit Admin
+          </button>
+        </div>
       </header>
+
       <main className="admin-main" style={{ flex:1, padding:'24px', maxWidth:'1200px', margin:'0 auto', width:'100%' }}>
+        {/* Error Banner */}
+        <AnimatePresence>
+          {error && (
+            <motion.div
+              initial={{ opacity:0, y:-20 }} animate={{ opacity:1, y:0 }} exit={{ opacity:0 }}
+              style={{ padding:'12px 20px', background:'rgba(244,63,94,0.15)', border:'1px solid rgba(244,63,94,0.3)', borderRadius:'12px', color:'#F43F5E', fontSize:'14px', fontWeight:600, marginBottom:'24px', display:'flex', justifyContent:'space-between', alignItems:'center' }}
+            >
+              <span>⚠️ Error: {error}</span>
+              <button onClick={() => setError(null)} style={{ background:'none', border:'none', color:'#F43F5E', cursor:'pointer', fontSize:'18px' }}>×</button>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
         {/* Stats Row */}
         <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit, minmax(240px, 1fr))', gap:'20px', marginBottom:'40px' }}>
-          {STATS.map(stat => (
+          {statsDisplay.map(stat => (
             <div key={stat.label} style={{ background:'var(--color-card)', padding:'24px', borderRadius:'16px', border:'1px solid var(--color-card-border)', boxShadow:'0 4px 24px rgba(0,0,0,0.2)' }}>
               <p style={{ fontSize:'13px', fontWeight:600, color:'var(--color-text-muted)', marginBottom:'8px', textTransform:'uppercase', letterSpacing:'0.05em' }}>{stat.label}</p>
               <p style={{ fontSize:'36px', fontWeight:800, color: stat.color || 'var(--color-text-primary)' }}>{stat.value}</p>
             </div>
           ))}
         </div>
+
         {/* Tabs */}
         <div style={{ display:'flex', gap:'12px', marginBottom:'24px' }}>
-          {['Reports', 'Flagged', 'Users'].map(tab => (
+          {['Reports', 'Users'].map(tab => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
@@ -102,118 +181,104 @@ export default function AdminDashboard() {
             </button>
           ))}
         </div>
+
         {/* Tab Content Area */}
         <div style={{ background:'var(--color-card)', borderRadius:'20px', border:'1px solid var(--color-card-border)', overflow:'hidden', boxShadow:'0 12px 40px rgba(0,0,0,0.3)' }}>
-          {/* Header & Search */}
           <div style={{ padding:'20px 24px', borderBottom:'1px solid rgba(255,255,255,0.05)', display:'flex', justifyContent:'space-between', alignItems:'center' }}>
             <h2 style={{ fontSize:'18px', fontWeight:700, color:'var(--color-text-primary)' }}>{activeTab} Management</h2>
-            <div style={{ position:'relative' }}>
-              <svg viewBox="0 0 24 24" fill="none" width="16" height="16" style={{ position:'absolute', left:'12px', top:'50%', transform:'translateY(-50%)', color:'var(--color-text-muted)' }}><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/></svg>
-              <input type="text" placeholder={`Search ${activeTab.toLowerCase()}...`} style={{ padding:'8px 12px 8px 36px', borderRadius:'10px', background:'rgba(255,255,255,0.03)', border:'1px solid rgba(255,255,255,0.1)', color:'var(--color-text-primary)', outline:'none', fontSize:'14px' }} />
-            </div>
           </div>
-          {/* Table Container */}
+
           <div style={{ overflowX:'auto' }}>
             {activeTab === 'Reports' && (
               <table style={{ width:'100%', borderCollapse:'collapse', textAlign:'left' }}>
                 <thead>
                   <tr style={{ background:'rgba(255,255,255,0.02)', borderBottom:'1px solid rgba(255,255,255,0.1)' }}>
-                    <th style={{ padding:'16px 24px', fontSize:'12px', fontWeight:700, color:'var(--color-text-muted)', textTransform:'uppercase', letterSpacing:'0.05em' }}>Student</th>
-                    <th style={{ padding:'16px 24px', fontSize:'12px', fontWeight:700, color:'var(--color-text-muted)', textTransform:'uppercase', letterSpacing:'0.05em' }}>Item</th>
-                    <th style={{ padding:'16px 24px', fontSize:'12px', fontWeight:700, color:'var(--color-text-muted)', textTransform:'uppercase', letterSpacing:'0.05em' }}>Status</th>
-                    <th style={{ padding:'16px 24px', fontSize:'12px', fontWeight:700, color:'var(--color-text-muted)', textTransform:'uppercase', letterSpacing:'0.05em' }}>Score</th>
-                    <th style={{ padding:'16px 24px', fontSize:'12px', fontWeight:700, color:'var(--color-text-muted)', textTransform:'uppercase', letterSpacing:'0.05em' }}>Date</th>
-                    <th style={{ padding:'16px 24px', fontSize:'12px', fontWeight:700, color:'var(--color-text-muted)', textTransform:'uppercase', letterSpacing:'0.05em', textAlign:'right' }}>Actions</th>
+                    <th style={{ padding:'16px 24px', fontSize:'12px', fontWeight:700, color:'var(--color-text-muted)', textTransform:'uppercase' }}>Student</th>
+                    <th style={{ padding:'16px 24px', fontSize:'12px', fontWeight:700, color:'var(--color-text-muted)', textTransform:'uppercase' }}>Item</th>
+                    <th style={{ padding:'16px 24px', fontSize:'12px', fontWeight:700, color:'var(--color-text-muted)', textTransform:'uppercase' }}>Type</th>
+                    <th style={{ padding:'16px 24px', fontSize:'12px', fontWeight:700, color:'var(--color-text-muted)', textTransform:'uppercase' }}>Status</th>
+                    <th style={{ padding:'16px 24px', fontSize:'12px', fontWeight:700, color:'var(--color-text-muted)', textTransform:'uppercase', textAlign:'right' }}>Actions</th>
                   </tr>
                 </thead>
                 <tbody>
                   {loading ? (
-                    <>{[1,2,3,4,5].map(i => <tr key={i} className="admin-table-row"><td colSpan="6"><SkeletonRow /></td></tr>)}</>
-                  ) : (
-                    MOCK_REPORTS.slice(0,5).map((r, i) => (
-                      <tr key={i} className="admin-table-row" style={{ borderBottom:'1px solid rgba(255,255,255,0.05)', background: i%2===0 ? 'transparent' : 'rgba(255,255,255,0.01)' }}>
-                        <td className="admin-table-cell" style={{ padding:'16px 24px', fontSize:'14px', color:'var(--color-text-primary)', fontWeight:600 }}>{r.student}</td>
-                        <td className="admin-table-cell" style={{ padding:'16px 24px', fontSize:'14px', color:'var(--color-text-secondary)' }}>{r.item}</td>
-                        <td className="admin-table-cell" style={{ padding:'16px 24px', fontSize:'14px' }}>
-                          <span style={{ padding:'4px 8px', borderRadius:'6px', background: r.status === 'Matched' ? 'rgba(16,185,129,0.1)' : 'rgba(79,70,229,0.1)', color: r.status === 'Matched' ? '#10B981' : '#818CF8', fontWeight:600, fontSize:'12px' }}>
-                            {r.status}
+                    <>{[1,2,3,4,5].map(i => <tr key={i}><td colSpan="5"><SkeletonRow /></td></tr>)}</>
+                  ) : items.length > 0 ? (
+                    items.map((item, i) => (
+                      <tr key={item._id} style={{ borderBottom:'1px solid rgba(255,255,255,0.05)' }}>
+                        <td style={{ padding:'16px 24px', fontSize:'14px', color:'var(--color-text-primary)', fontWeight:600 }}>{item.reportedBy?.name || 'Unknown'}</td>
+                        <td style={{ padding:'16px 24px', fontSize:'14px', color:'var(--color-text-secondary)' }}>{item.title}</td>
+                        <td style={{ padding:'16px 24px', fontSize:'14px', textTransform:'capitalize' }}>{item.type}</td>
+                        <td style={{ padding:'16px 24px', fontSize:'14px' }}>
+                          <span style={{ padding:'4px 8px', borderRadius:'6px', background: item.status === 'resolved' ? 'rgba(16,185,129,0.1)' : 'rgba(79,70,229,0.1)', color: item.status === 'resolved' ? '#10B981' : '#818CF8', fontWeight:600, fontSize:'12px' }}>
+                            {item.status}
                           </span>
                         </td>
-                        <td className="admin-table-cell" style={{ padding:'16px 24px', fontSize:'14px', color: r.score !== '-' ? '#10B981' : 'var(--color-text-muted)', fontWeight:700 }}>{r.score}{r.score !== '-' && '%'}</td>
-                        <td className="admin-table-cell" style={{ padding:'16px 24px', fontSize:'14px', color:'var(--color-text-muted)' }}>{r.date}</td>
-                        <td className="admin-table-cell" style={{ padding:'16px 24px', textAlign:'right' }}>
-                          <button style={{ background:'transparent', border:'none', color:'#4F46E5', fontSize:'13px', fontWeight:600, cursor:'pointer', marginRight:'12px' }}>View</button>
-                          <button style={{ background:'transparent', border:'none', color:'#F43F5E', fontSize:'13px', fontWeight:600, cursor:'pointer' }}>Flag</button>
+                        <td style={{ padding:'16px 24px', textAlign:'right' }}>
+                          <button onClick={() => { setSelectedItem(item); setViewModalOpen(true); }} style={{ background:'transparent', border:'none', color:'#4F46E5', fontSize:'13px', fontWeight:600, cursor:'pointer' }}>View Details</button>
                         </td>
                       </tr>
                     ))
+                  ) : (
+                    <tr>
+                      <td colSpan="5" style={{ padding:'60px 24px', textAlign:'center', color:'var(--color-text-muted)', fontSize:'15px' }}>
+                        No reports found yet.
+                      </td>
+                    </tr>
                   )}
                 </tbody>
               </table>
             )}
-            {activeTab === 'Flagged' && (
-              <div style={{ padding:'24px', display:'flex', flexDirection:'column', gap:'16px' }}>
-                {loading ? <SkeletonRow /> : (
-                  <div style={{ borderLeft:'4px solid #F43F5E', background:'rgba(244,63,94,0.05)', padding:'20px', borderRadius:'12px', display:'flex', justifyContent:'space-between', alignItems:'center' }}>
-                    <div>
-                      <h3 style={{ fontSize:'16px', fontWeight:700, color:'#FB7185', marginBottom:'4px' }}>Inappropriate Description</h3>
-                      <p style={{ fontSize:'13px', color:'var(--color-text-secondary)' }}>Reported by multiple users on item "Wallet" by Ravi Teja.</p>
-                    </div>
-                    <div style={{ display:'flex', gap:'8px' }}>
-                      <button style={{ padding:'8px 16px', borderRadius:'8px', background:'rgba(16,185,129,0.1)', color:'#10B981', border:'none', fontWeight:600, cursor:'pointer' }}>Approve</button>
-                      <button style={{ padding:'8px 16px', borderRadius:'8px', background:'rgba(244,63,94,0.1)', color:'#F43F5E', border:'none', fontWeight:600, cursor:'pointer' }}>Delete & Block User</button>
-                    </div>
-                  </div>
-                )}
-              </div>
-            )}
+
             {activeTab === 'Users' && (
               <table style={{ width:'100%', borderCollapse:'collapse', textAlign:'left' }}>
                 <thead>
                   <tr style={{ background:'rgba(255,255,255,0.02)', borderBottom:'1px solid rgba(255,255,255,0.1)' }}>
                     <th style={{ padding:'16px 24px', fontSize:'12px', fontWeight:700, color:'var(--color-text-muted)', textTransform:'uppercase' }}>User Info</th>
-                    <th style={{ padding:'16px 24px', fontSize:'12px', fontWeight:700, color:'var(--color-text-muted)', textTransform:'uppercase' }}>Roll No</th>
+                    <th style={{ padding:'16px 24px', fontSize:'12px', fontWeight:700, color:'var(--color-text-muted)', textTransform:'uppercase' }}>Role</th>
                     <th style={{ padding:'16px 24px', fontSize:'12px', fontWeight:700, color:'var(--color-text-muted)', textTransform:'uppercase' }}>Status</th>
-                    <th style={{ padding:'16px 24px', fontSize:'12px', fontWeight:700, color:'var(--color-text-muted)', textTransform:'uppercase', textAlign:'right' }}>Account Access</th>
+                    <th style={{ padding:'16px 24px', fontSize:'12px', fontWeight:700, color:'var(--color-text-muted)', textTransform:'uppercase', textAlign:'right' }}>Access Control</th>
                   </tr>
                 </thead>
                 <tbody>
                   {loading ? (
                     <>{[1,2,3].map(i => <tr key={i}><td colSpan="4"><SkeletonRow /></td></tr>)}</>
-                  ) : (
-                    users.map((u, i) => (
-                      <tr key={u.id} style={{ borderBottom:'1px solid rgba(255,255,255,0.05)' }}>
+                  ) : users.length > 0 ? (
+                    users.map((u) => (
+                      <tr key={u._id} style={{ borderBottom:'1px solid rgba(255,255,255,0.05)' }}>
                         <td style={{ padding:'16px 24px' }}>
                           <p style={{ fontSize:'15px', fontWeight:700, color:'var(--color-text-primary)' }}>{u.name}</p>
-                          <p style={{ fontSize:'13px', color:'var(--color-text-muted)' }}>{u.email}</p>
+                          <div style={{ display:'flex', flexDirection:'column', gap:'1px' }}>
+                            <p style={{ fontSize:'12px', color:'var(--color-text-muted)' }}>{u.email}</p>
+                            {u.roll && <p style={{ fontSize:'11px', fontWeight:700, color:'#818CF8' }}>{u.roll}</p>}
+                          </div>
                         </td>
-                        <td style={{ padding:'16px 24px', fontSize:'14px', color:'var(--color-text-secondary)' }}>{u.roll}</td>
+                        <td style={{ padding:'16px 24px', fontSize:'14px', color:'var(--color-text-secondary)', textTransform:'capitalize' }}>{u.role}</td>
                         <td style={{ padding:'16px 24px' }}>
-                          <span style={{ padding:'4px 8px', borderRadius:'6px', background: u.status === 'active' ? 'rgba(16,185,129,0.1)' : 'rgba(244,63,94,0.1)', color: u.status === 'active' ? '#10B981' : '#F43F5E', fontWeight:600, fontSize:'12px', textTransform:'capitalize' }}>
-                            {u.status}
+                          <span style={{ padding:'4px 8px', borderRadius:'6px', background: u.accountStatus === 'active' ? 'rgba(16,185,129,0.1)' : 'rgba(244,63,94,0.1)', color: u.accountStatus === 'active' ? '#10B981' : '#F43F5E', fontWeight:600, fontSize:'12px', textTransform:'capitalize' }}>
+                            {u.accountStatus}
                           </span>
                         </td>
                         <td style={{ padding:'16px 24px', textAlign:'right' }}>
-                          <div style={{ display:'flex', justifyContent:'flex-end', alignItems:'center', gap:'12px' }}>
-                            <span style={{ fontSize:'13px', color:'var(--color-text-muted)' }}>{u.status === 'active' ? 'Active' : 'Blocked'}</span>
-                            <ToggleSwitch active={u.status === 'active'} onChange={() => toggleUserStatus(u.id)} />
-                          </div>
+                          {u.role !== 'admin' && (
+                            <div style={{ display:'flex', justifyContent:'flex-end', alignItems:'center', gap:'12px' }}>
+                              <span style={{ fontSize:'13px', color:'var(--color-text-muted)' }}>{u.accountStatus === 'active' ? 'Active' : 'Blocked'}</span>
+                              <ToggleSwitch active={u.accountStatus === 'active'} onChange={() => toggleUserStatus(u._id, u.accountStatus)} />
+                            </div>
+                          )}
                         </td>
                       </tr>
                     ))
+                  ) : (
+                    <tr>
+                      <td colSpan="4" style={{ padding:'60px 24px', textAlign:'center', color:'var(--color-text-muted)', fontSize:'15px' }}>
+                        No students registered yet.
+                      </td>
+                    </tr>
                   )}
                 </tbody>
               </table>
             )}
-          </div>
-          {/* Pagination Mock */}
-          <div style={{ padding:'16px 24px', display:'flex', justifyContent:'space-between', alignItems:'center', borderTop:'1px solid rgba(255,255,255,0.05)', background:'rgba(255,255,255,0.01)' }}>
-            <span style={{ fontSize:'13px', color:'var(--color-text-muted)' }}>Showing 1-5 of 12 entries</span>
-            <div style={{ display:'flex', gap:'8px' }}>
-              <button style={{ padding:'6px 12px', borderRadius:'8px', background:'rgba(255,255,255,0.05)', border:'none', color:'var(--color-text-secondary)', cursor:'pointer' }}>Prev</button>
-              <button style={{ padding:'6px 12px', borderRadius:'8px', background:'rgba(255,255,255,0.1)', border:'none', color:'#fff', cursor:'pointer' }}>1</button>
-              <button style={{ padding:'6px 12px', borderRadius:'8px', background:'rgba(255,255,255,0.05)', border:'none', color:'var(--color-text-secondary)', cursor:'pointer' }}>Next</button>
-            </div>
           </div>
         </div>
       </main>

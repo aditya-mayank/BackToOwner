@@ -6,8 +6,8 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true)
   useEffect(() => {
     // Check localStorage on mount
-    const storedToken = localStorage.getItem('token')
-    const storedUser = localStorage.getItem('user')
+    const storedToken = localStorage.getItem('bto_token')
+    const storedUser = localStorage.getItem('bto_user')
     if (storedToken && storedUser) {
       setToken(storedToken)
       setUser(JSON.parse(storedUser))
@@ -17,14 +17,14 @@ export function AuthProvider({ children }) {
   const login = (userData, authToken) => {
     setUser(userData)
     setToken(authToken)
-    localStorage.setItem('token', authToken)
-    localStorage.setItem('user', JSON.stringify(userData))
+    localStorage.setItem('bto_token', authToken)
+    localStorage.setItem('bto_user', JSON.stringify(userData))
   }
   const logout = () => {
     setUser(null)
     setToken(null)
-    localStorage.removeItem('token')
-    localStorage.removeItem('user')
+    localStorage.removeItem('bto_token')
+    localStorage.removeItem('bto_user')
   }
   const value = {
     user,

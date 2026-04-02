@@ -15,10 +15,12 @@ import ReportLost     from './pages/ReportLost'
 import ReportFound    from './pages/ReportFound'
 import Notifications  from './pages/Notifications'
 import SecureChat     from './pages/SecureChat'
+import ActiveChats    from './pages/ActiveChats'
 import MyReports      from './pages/MyReports'
 import AdminDashboard from './pages/AdminDashboard'
 import Profile        from './pages/Profile'
 import NotFound       from './pages/NotFound'
+import About          from './pages/About'
 /* ─── Landing Page ───────────────────────────────────────────────────── */
 function LandingPage({ isDark, toggleDark }) {
   return (
@@ -59,9 +61,11 @@ function AnimatedRoutes({ isDark, toggleDark }) {
         <Route path="/report-lost" element={<ProtectedRoute><PageWrapper><ReportLost /></PageWrapper></ProtectedRoute>} />
         <Route path="/report-found" element={<ProtectedRoute><PageWrapper><ReportFound /></PageWrapper></ProtectedRoute>} />
         <Route path="/notifications" element={<ProtectedRoute><PageWrapper><Notifications /></PageWrapper></ProtectedRoute>} />
-        <Route path="/chat/:matchId" element={<ProtectedRoute><PageWrapper><SecureChat /></PageWrapper></ProtectedRoute>} />
+        <Route path="/chats" element={<ProtectedRoute><PageWrapper><ActiveChats /></PageWrapper></ProtectedRoute>} />
+        <Route path="/chat/:chatId" element={<ProtectedRoute><PageWrapper><SecureChat /></PageWrapper></ProtectedRoute>} />
         <Route path="/my-reports" element={<ProtectedRoute><PageWrapper><MyReports /></PageWrapper></ProtectedRoute>} />
         <Route path="/profile" element={<ProtectedRoute><PageWrapper><Profile /></PageWrapper></ProtectedRoute>} />
+        <Route path="/about" element={<ProtectedRoute><PageWrapper><About /></PageWrapper></ProtectedRoute>} />
         {/* Admin Route */}
         <Route path="/admin" element={<AdminRoute><PageWrapper><AdminDashboard /></PageWrapper></AdminRoute>} />
         {/* 404 Route */}
