@@ -1,7 +1,10 @@
 import axios from 'axios';
 
+const rawBase = import.meta.env.VITE_API_URL || 'https://backtoowner.onrender.com';
+const resolvedBaseURL = rawBase.endsWith('/api') ? rawBase : `${rawBase}/api`;
+
 const axiosClient = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'https://backtoowner.onrender.com',
+  baseURL: resolvedBaseURL,
   headers: {
     'Content-Type': 'application/json'
   }
