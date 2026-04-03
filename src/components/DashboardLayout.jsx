@@ -205,7 +205,7 @@ export default function DashboardLayout({ children }) {
             style={{ width: '32px', height: '32px', borderRadius: '50%', background: '#4F46E5', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', cursor: 'pointer', fontWeight: 700, fontSize: '14px' }}
           >{user?.name?.charAt(0)}</div>
         </div>
-        <main style={{ flex: 1, padding: '32px', overflowY: 'auto' }}>{children}</main>
+        <main className="dashboard-main-content" style={{ flex: 1, overflowY: 'auto' }}>{children}</main>
       </div>
     </div>
   )
