@@ -73,11 +73,6 @@ export const sendMessage = async (req, res) => {
     const { text } = req.body;
     const userId = req.user._id;
 
-    const hasText = text && text.trim() !== '';
-    if (!hasText && !req.file) {
-      return res.status(400).json({ success: false, message: 'Message text or attachment is required' });
-    }
-
     // 1. Fetch Chat
     const chat = await Chat.findById(chatId);
 
@@ -93,24 +88,12 @@ export const sendMessage = async (req, res) => {
       return res.status(400).json({ success: false, message: 'Chat is closed' });
     }
 
-    // 4. Construct message
+    // 4. Construct & Append message
     const messageData = {
       senderId: userId,
-      text: hasText ? text.trim() : ''
+      text: text.trim()
     };
-
-    if (req.file) {
-      messageData.attachmentUrl = req.file.path;
-      // Evaluate if file is video or image. 
-      // multer-storage-cloudinary attaches correct mimetype if we set resource_type: 'auto'
-      if (req.file.mimetype && req.file.mimetype.startsWith('video/')) {
-        messageData.attachmentType = 'video';
-      } else {
-        messageData.attachmentType = 'image';
-      }
-    }
-
-    // 5. Append message
+    
     chat.messages.push(messageData);
 
     // 5. Save to DB
