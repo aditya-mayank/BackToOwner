@@ -1,5 +1,4 @@
-import { uploadImage } from '../utils/cloudinary.js';
-import { extractKeywords, evaluateItemMatch } from '../utils/matchingEngine.js';
+import { extractKeywords, evaluateItemMatch, computeImageHash } from '../utils/matchingEngine.js';
 import Item from '../models/Item.model.js';
 import { initiateChat } from './chat.controller.js';
 import { createInternalNotification } from './notification.controller.js';
@@ -21,17 +20,15 @@ export const reportFoundItem = async (req, res) => {
 
     // 3. Optional Image processing
     let imageUrl = null;
+    let imageHash = null;
     if (req.file) {
-      try {
-        imageUrl = await uploadImage(req.file.buffer);
-      } catch (uploadError) {
-        console.error('Cloudinary Upload Error:', uploadError);
-        return res.status(400).json({ success: false, message: 'Image upload failed. Please try again.' });
-      }
+      imageUrl = req.file.path; // multer-storage-cloudinary attaches the URL to req.file.path
+      imageHash = await computeImageHash(imageUrl);
     }
 
     // 4. Construct and Save Item
-    const itemVisibility = (visibility === 'private' || visibility === 'public') ? visibility : 'private';
+    // Found items are ALWAYS private — finders contact losers privately via chat
+    const itemVisibility = 'private';
     const savedItem = await new Item({
       reportedBy: req.user._id,
       title,
@@ -40,6 +37,7 @@ export const reportFoundItem = async (req, res) => {
       location,
       dateLost: dateLost || null,
       imageUrl,
+      imageHash,
       status: 'active',
       visibility: itemVisibility,
       type: 'found'
@@ -59,7 +57,7 @@ export const reportFoundItem = async (req, res) => {
     
     for (const lostItem of lostItems) {
       const matchResult = evaluateItemMatch(savedItem, lostItem);
-      if (matchResult.score >= 70) {
+      if (matchResult.isMatch) {
         matchesFound++;
         
         // Notify both parties
@@ -111,13 +109,10 @@ export const reportLostItem = async (req, res) => {
 
     // 3. Optional Image processing
     let imageUrl = null;
+    let imageHash = null;
     if (req.file) {
-      try {
-        imageUrl = await uploadImage(req.file.buffer);
-      } catch (uploadError) {
-        console.error('Cloudinary Upload Error:', uploadError);
-        return res.status(400).json({ success: false, message: 'Image upload failed. Please try again.' });
-      }
+      imageUrl = req.file.path; // multer-storage-cloudinary attaches the URL to req.file.path
+      imageHash = await computeImageHash(imageUrl);
     }
 
     // 4. Resolve visibility
@@ -132,6 +127,7 @@ export const reportLostItem = async (req, res) => {
       location,
       dateLost: dateLost || null,
       imageUrl,
+      imageHash,
       status: 'active',
       visibility: itemVisibility,
       type: 'lost'
@@ -151,7 +147,7 @@ export const reportLostItem = async (req, res) => {
 
     for (const foundItem of foundItems) {
       const matchResult = evaluateItemMatch(savedItem, foundItem);
-      if (matchResult.score >= 70) {
+      if (matchResult.isMatch) {
         matches.push({ foundItemId: foundItem._id, score: matchResult.score });
 
         // Notify both parties
@@ -193,9 +189,13 @@ export const searchItems = async (req, res) => {
     const query = {};
 
     if (reportedBy) {
+      // User viewing their own items — show everything including private
       query.reportedBy = reportedBy;
       if (status && status !== 'all') query.status = status;
     } else {
+      // Public feed — only show LOST items that are explicitly public
+      // Found items are NEVER shown publicly (finders contact via chat)
+      query.type = 'lost';
       query.visibility = 'public';
       if (status && status !== 'all') {
         query.status = status;

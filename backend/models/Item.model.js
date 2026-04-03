@@ -31,6 +31,10 @@ const itemSchema = new mongoose.Schema(
       type: String,
       default: null
     },
+    imageHash: {
+      type: String,
+      default: null
+    },
     status: {
       type: String,
       enum: ['active', 'matched', 'resolved', 'archived'],
