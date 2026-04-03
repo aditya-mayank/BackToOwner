@@ -3,73 +3,33 @@ import { useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import DashboardLayout from '../components/DashboardLayout'
 import { itemsAPI } from '../api/endpoints.js'
+import { Smartphone, PenTool, CreditCard, Shirt, Briefcase, Key, Package, Sparkles } from 'lucide-react'
+
 /* ─── Constants ──────────────────────────────────────────────────────── */
 const CATEGORIES = [
-  { value: 'electronics', label: 'Electronics',  emoji: '📱' },
-  { value: 'stationery',  label: 'Stationery',   emoji: '✏️'  },
-  { value: 'id-cards',    label: 'ID / Cards',   emoji: '🪪'  },
-  { value: 'clothing',    label: 'Clothing',      emoji: '👕'  },
-  { value: 'bags',        label: 'Bags',          emoji: '🎒'  },
-  { value: 'keys',        label: 'Keys',          emoji: '🔑'  },
-  { value: 'others',      label: 'Others',        emoji: '📦'  },
+  { value: 'electronics', label: 'Electronics', icon: <Smartphone size={17}/> },
+  { value: 'stationery',  label: 'Stationery',  icon: <PenTool size={17}/> },
+  { value: 'id-cards',    label: 'ID / Cards',  icon: <CreditCard size={17}/> },
+  { value: 'clothing',    label: 'Clothing',    icon: <Shirt size={17}/> },
+  { value: 'bags',        label: 'Bags',        icon: <Briefcase size={17}/> },
+  { value: 'keys',        label: 'Keys',        icon: <Key size={17}/> },
+  { value: 'others',      label: 'Others',      icon: <Package size={17}/> },
 ]
 const LOCATION_GROUPS = [
-  {
-    group: '🚪 Main Entry & Roads',
-    options: ['Main Gate (Kakatiya Thoranam)', 'Secondary Gate', 'Security Checkpoint', 'NH Road (Campus Divider)', 'Internal Campus Roads'],
-  },
-  {
-    group: '🏢 Admin & Academic',
-    options: ['Administrative Building', 'Director Office', 'Dean Offices', 'Academic Block 1 (AB-1)', 'Academic Block 2 (AB-2)', 'Lecture Hall Complex (LHC)', 'Seminar Hall', 'CSE Department', 'ECE Department', 'EEE Department', 'Mechanical Department', 'Civil Department', 'Chemical Department', 'Metallurgy Department', 'Biotechnology Department'],
-  },
-  {
-    group: '🔬 Labs & Tech Centres',
-    options: ['Central Computer Centre (CCC)', 'Mega Computer Centre', 'Physics Lab', 'Chemistry Lab', 'Electrical Machines Lab', 'Robotics Lab', 'IoT Lab', 'Mechatronics Lab', 'High Voltage Lab', 'Research Centre / Centre of Excellence'],
-  },
-  {
-    group: '📚 Library & Study Areas',
-    options: ['Central Library', 'Reading Room', 'Digital Library Section', 'Journal Section', 'Discussion Room'],
-  },
-  {
-    group: '🏠 Boys Hostels',
-    options: ['Ultra Mega Hostel (1.8K)', '1K Hostel', 'Hostel Block A', 'Hostel Block B', 'Hostel Block C', 'Hostel Block D', 'Hostel Block E', 'International Hostel'],
-  },
-  {
-    group: '🏠 Girls Hostels',
-    options: ['Sarojini Hostel', 'Girls Hostel Block'],
-  },
-  {
-    group: '🍽️ Food & Eateries',
-    options: ['IFC A (Institute Food Court)', 'IFC B', 'IFC C', 'Priyadarshini Mess (Girls)', 'Govt Mess (Boys)', 'New NIT Canteen', 'Staff Canteen', 'Nescafe', 'Café Coffee Day', 'BRU Outlet', 'Amul Outlet'],
-  },
-  {
-    group: '🛒 Shopping & Services',
-    options: ['Shopping Complex', 'Xerox Shop', 'Laundry Shop', 'Salon', 'Stationery Shop', 'General Store', 'SBI Bank', 'ATM', 'Post Office', 'Health Centre / Dispensary'],
-  },
-  {
-    group: '🏋️ Sports & Fitness',
-    options: ['Sports Complex', 'Indoor Games Complex', 'Cricket Ground', 'Football Ground', 'Basketball Court', 'Volleyball Court', 'Tennis Court', 'Gymnasium'],
-  },
-  {
-    group: '🎭 Student Activity Areas',
-    options: ['Student Activity Centre (SAC)', 'Auditorium', 'Open Air Theatre (OAT)', 'Club Rooms', 'Fest Ground (Technozion / Springspree)', 'Music & Dance Room'],
-  },
-  {
-    group: '🏡 Faculty & Staff Areas',
-    options: ['Faculty Quarters', 'Staff Quarters', 'Director Bungalow', 'Guest House'],
-  },
-  {
-    group: '🚗 Transport & Utilities',
-    options: ['Motor Transport Section (MT)', 'Parking Area', 'Bus Stop (Inside Campus)', 'Power Station'],
-  },
-  {
-    group: '🌳 Campus Spots',
-    options: ['Dept Lawn', 'Hostel Grounds', 'Lake / Green Zone', 'Back Gate Area', 'Shortcut Path (Hostel–Dept)', 'Night Walk Road'],
-  },
-  {
-    group: '📍 Other',
-    options: ['Others (specify below)'],
-  },
+  { group: 'Main Entry & Roads', options: ['Main Gate (Kakatiya Thoranam)', 'Secondary Gate', 'Security Checkpoint', 'NH Road (Campus Divider)', 'Internal Campus Roads'] },
+  { group: 'Admin & Academic', options: ['Administrative Building', 'Director Office', 'Dean Offices', 'Academic Block 1 (AB-1)', 'Academic Block 2 (AB-2)', 'Lecture Hall Complex (LHC)', 'Seminar Hall', 'CSE Department', 'ECE Department', 'EEE Department', 'Mechanical Department', 'Civil Department', 'Chemical Department', 'Metallurgy Department', 'Biotechnology Department'] },
+  { group: 'Labs & Tech Centres', options: ['Central Computer Centre (CCC)', 'Mega Computer Centre', 'Physics Lab', 'Chemistry Lab', 'Electrical Machines Lab', 'Robotics Lab', 'IoT Lab', 'Mechatronics Lab', 'High Voltage Lab', 'Research Centre / Centre of Excellence'] },
+  { group: 'Library & Study Areas', options: ['Central Library', 'Reading Room', 'Digital Library Section', 'Journal Section', 'Discussion Room'] },
+  { group: 'Boys Hostels', options: ['Ultra Mega Hostel (1.8K)', '1K Hostel', 'Hostel Block A', 'Hostel Block B', 'Hostel Block C', 'Hostel Block D', 'Hostel Block E', 'International Hostel'] },
+  { group: 'Girls Hostels', options: ['Sarojini Hostel', 'Girls Hostel Block'] },
+  { group: 'Food & Eateries', options: ['IFC A (Institute Food Court)', 'IFC B', 'IFC C', 'Priyadarshini Mess (Girls)', 'Govt Mess (Boys)', 'New NIT Canteen', 'Staff Canteen', 'Nescafe', 'Café Coffee Day', 'BRU Outlet', 'Amul Outlet'] },
+  { group: 'Shopping & Services', options: ['Shopping Complex', 'Xerox Shop', 'Laundry Shop', 'Salon', 'Stationery Shop', 'General Store', 'SBI Bank', 'ATM', 'Post Office', 'Health Centre / Dispensary'] },
+  { group: 'Sports & Fitness', options: ['Sports Complex', 'Indoor Games Complex', 'Cricket Ground', 'Football Ground', 'Basketball Court', 'Volleyball Court', 'Tennis Court', 'Gymnasium'] },
+  { group: 'Student Activity Areas', options: ['Student Activity Centre (SAC)', 'Auditorium', 'Open Air Theatre (OAT)', 'Club Rooms', 'Fest Ground (Technozion / Springspree)', 'Music & Dance Room'] },
+  { group: 'Faculty & Staff Areas', options: ['Faculty Quarters', 'Staff Quarters', 'Director Bungalow', 'Guest House'] },
+  { group: 'Transport & Utilities', options: ['Motor Transport Section (MT)', 'Parking Area', 'Bus Stop (Inside Campus)', 'Power Station'] },
+  { group: 'Campus Spots', options: ['Dept Lawn', 'Hostel Grounds', 'Lake / Green Zone', 'Back Gate Area', 'Shortcut Path (Hostel–Dept)', 'Night Walk Road'] },
+  { group: 'Other', options: ['Others (specify below)'] },
 ]
 const STEPS = ['Item Details', 'Location & Time', 'Review & Submit']
 /* ─── Confetti ───────────────────────────────────────────────────────── */
@@ -208,12 +168,12 @@ function Step1({ data, setData }) {
           >
             <option value="" disabled style={{ background: '#1a1a2e', color: '#fff' }}>Select a category…</option>
             {CATEGORIES.map(c => (
-              <option key={c.value} value={c.value} style={{ background: '#1a1a2e', color: '#fff' }}>{c.emoji}  {c.label}</option>
+              <option key={c.value} value={c.value} style={{ background: '#1a1a2e', color: '#fff' }}>{c.label}</option>
             ))}
           </select>
           {data.category && (
-            <span style={{ position:'absolute', left:'13px', top:'50%', transform:'translateY(-50%)', fontSize:'17px', pointerEvents:'none' }}>
-              {CATEGORIES.find(c => c.value === data.category)?.emoji}
+            <span style={{ position:'absolute', left:'13px', top:'50%', transform:'translateY(-50%)', pointerEvents:'none', display:'flex', alignItems:'center', color:'var(--color-text-secondary)' }}>
+              {CATEGORIES.find(c => c.value === data.category)?.icon}
             </span>
           )}
           <svg viewBox="0 0 24 24" fill="none" width="15" height="15" style={{ position:'absolute', right:'14px', top:'50%', transform:'translateY(-50%)', pointerEvents:'none', color:'var(--color-text-muted)' }}>
@@ -438,8 +398,8 @@ function Step3({ data, onSubmit, loading, success }) {
       <div style={{ padding:'20px', borderRadius:'18px', background:'rgba(79,70,229,0.07)', border:'1px solid rgba(79,70,229,0.2)', marginBottom:'24px' }}>
         <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'14px' }}>
           {[
-            { label:'Category',    value: data.category === 'others' && data.customCategory ? `📦 ${data.customCategory}` : (cat ? `${cat.emoji} ${cat.label}` : '—') },
-            { label:'Visibility',  value: data.visibility === 'public' ? '🌐 Public' : '🔒 Private' },
+            { label:'Category',    value: data.category === 'others' && data.customCategory ? data.customCategory : (cat ? cat.label : '—') },
+            { label:'Visibility',  value: data.visibility === 'public' ? 'Public' : 'Private' },
             { label:'Item Name',   value: data.itemName   || '—' },
             { label:'Location',    value: data.location === 'Others (specify below)' && data.customLocation ? data.customLocation : (data.location || '—') },
             { label:'Date Lost',   value: data.dateLost ? new Date(data.dateLost).toLocaleDateString('en-IN',{day:'numeric',month:'long',year:'numeric'}) : '—' },
@@ -460,9 +420,9 @@ function Step3({ data, onSubmit, loading, success }) {
         <motion.div
           animate={{ rotate:360 }}
           transition={{ duration:4, repeat:Infinity, ease:'linear' }}
-          style={{ width:'44px', height:'44px', borderRadius:'50%', background:'rgba(16,185,129,0.15)', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0, fontSize:'20px' }}
+          style={{ width:'44px', height:'44px', borderRadius:'50%', background:'rgba(16,185,129,0.15)', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0, color:'#10B981' }}
         >
-          ✨
+          <Sparkles size={20} />
         </motion.div>
         <div>
           <p style={{ fontSize:'14px', fontWeight:700, color:'#34D399', marginBottom:'2px' }}>AI Matching Ready</p>
@@ -498,7 +458,7 @@ function Step3({ data, onSubmit, loading, success }) {
             />
           )}
           <span style={{ position:'relative', zIndex:1 }}>
-            {loading ? '🔄 Submitting…' : '🚀 Submit Lost Report'}
+            {loading ? 'Submitting...' : 'Submit Lost Report'}
           </span>
         </motion.button>
       ) : (
@@ -506,7 +466,7 @@ function Step3({ data, onSubmit, loading, success }) {
           initial={{ opacity:0, scale:0.9 }} animate={{ opacity:1, scale:1 }}
           style={{ width:'100%', padding:'18px', borderRadius:'16px', textAlign:'center', background:'rgba(16,185,129,0.12)', border:'1px solid rgba(16,185,129,0.3)' }}
         >
-          <div style={{ fontSize:'32px', marginBottom:'8px' }}>🎉</div>
+          <div style={{ marginBottom:'8px', display:'flex', justifyContent:'center', color:'#10B981' }}><Sparkles size={32} /></div>
           <p style={{ fontSize:'16px', fontWeight:800, color:'#10B981', marginBottom:'3px' }}>Report Submitted!</p>
           <p style={{ fontSize:'13px', color:'var(--color-text-secondary)' }}>AI matching has started. You'll be notified when a match is found.</p>
         </motion.div>

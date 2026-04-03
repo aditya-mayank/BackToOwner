@@ -1,6 +1,7 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
+import { Search } from 'lucide-react'
 
 export default function NotFound() {
   return (
@@ -47,11 +48,10 @@ export default function NotFound() {
             width: '68px', height: '68px', borderRadius: '22px', margin: '0 auto 28px',
             background: 'linear-gradient(135deg, rgba(79,70,229,0.15), rgba(16,185,129,0.1))',
             border: '1px solid rgba(79,70,229,0.25)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontSize: '28px',
+            display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#4F46E5',
           }}
         >
-          🔍
+          <Search size={32} />
         </motion.div>
 
         <motion.h1

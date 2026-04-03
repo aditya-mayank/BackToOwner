@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { useAuth } from '../context/AuthContext'
 import DashboardLayout from '../components/DashboardLayout'
 import { itemsAPI } from '../api/endpoints.js'
+import { Search, Package, Activity } from 'lucide-react'
 
 /* ─── Count-Up Hook ──────────────────────────────────────────────────── */
 function StatCard({ label, target, suffix, colorFrom, colorTo, glowColor, icon, delay, trigger }) {
@@ -174,7 +175,7 @@ export default function Dashboard() {
 
       const mappedActs = personalItems.slice(0, 6).map((item) => ({
         id: item._id,
-        icon: item.type === 'lost' ? '🔑' : '📦',
+        icon: item.type === 'lost' ? <Search size={18} /> : <Package size={18} />,
         text: `You reported a ${item.type} ${item.category}: "${item.title}" at ${item.location}.`,
         time: new Date(item.createdAt).toLocaleDateString(),
         color: item.type === 'lost' ? '#7C3AED' : '#4F46E5',
@@ -215,7 +216,7 @@ export default function Dashboard() {
           <div>
             <p style={{ fontSize: '12px', fontWeight: 700, letterSpacing: '0.08em', color: 'var(--color-text-muted)', textTransform: 'uppercase', marginBottom: '8px' }}>Student Dashboard</p>
             <h1 style={{ fontSize: 'clamp(26px, 4vw, 36px)', fontWeight: 900, letterSpacing: '-0.04em', color: 'var(--color-text-primary)', lineHeight: 1.1 }}>
-              {greeting}, {user?.name?.split(' ')[0]} 👋
+              {greeting}, {user?.name?.split(' ')[0]}
             </h1>
           </div>
           <div style={{ padding: '10px 18px', borderRadius: '14px', fontSize: '13px', fontWeight: 600, background: 'var(--color-card)', border: '1px solid var(--color-card-border)', color: 'var(--color-text-secondary)', boxShadow: 'var(--card-shadow)' }}>
@@ -260,7 +261,9 @@ export default function Dashboard() {
         >
           <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:'8px' }}>
             <div>
-              <h2 style={{ fontSize:'18px', fontWeight:800, color:'var(--color-text-primary)' }}>🌐 Campus Live Feed</h2>
+              <h2 style={{ fontSize:'18px', fontWeight:800, color:'var(--color-text-primary)', display:'flex', alignItems:'center', gap:'8px' }}>
+                <Activity size={20} color="#10B981" /> Campus Live Feed
+              </h2>
               <p style={{ fontSize:'13px', color:'var(--color-text-muted)', marginTop:'4px' }}>Public active lost &amp; found reports across campus</p>
             </div>
             <div style={{ display:'flex', alignItems:'center', gap:'6px' }}>
@@ -276,8 +279,8 @@ export default function Dashboard() {
                   initial={{ opacity:0, x:-12 }} animate={{ opacity:1, x:0 }} transition={{ delay: i * 0.05 }}
                   style={{ display:'flex', gap:'14px', alignItems:'center', padding:'14px 16px', borderRadius:'14px', background:'rgba(255,255,255,0.02)', border:'1px solid var(--color-card-border)' }}
                 >
-                  <div style={{ width:'40px', height:'40px', borderRadius:'12px', flexShrink:0, background: item.type==='lost' ? 'rgba(124,58,237,0.1)' : 'rgba(16,185,129,0.1)', display:'flex', alignItems:'center', justifyContent:'center', fontSize:'18px' }}>
-                    {item.type === 'lost' ? '🔍' : '📦'}
+                  <div style={{ width:'40px', height:'40px', borderRadius:'12px', flexShrink:0, background: item.type==='lost' ? 'rgba(124,58,237,0.1)' : 'rgba(16,185,129,0.1)', display:'flex', alignItems:'center', justifyContent:'center', color: item.type==='lost' ? '#A78BFA' : '#34D399' }}>
+                    {item.type === 'lost' ? <Search size={20} /> : <Package size={20} />}
                   </div>
                   <div style={{ flex:1, minWidth:0 }}>
                     <p style={{ fontSize:'14px', fontWeight:600, color:'var(--color-text-primary)', whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis' }}>{item.title}</p>

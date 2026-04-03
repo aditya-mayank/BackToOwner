@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { useAuth } from '../context/AuthContext'
+import { Lock } from 'lucide-react'
 /* ─── Typewriter ─────────────────────────────────────────────────────── */
 const WORDS = ['your wallet', 'your ID card', 'your laptop bag', 'your keys']
 function Typewriter() {
@@ -113,7 +114,7 @@ function FloatingCard() {
             <p style={{ fontSize: '11px', color: '#64748B', marginBottom: '2px', fontWeight: 500 }}>Found Item</p>
             <p style={{ fontSize: '15px', fontWeight: 700, color: '#F1F5F9', marginBottom: '4px' }}>Student ID Card</p>
             <p style={{ fontSize: '12px', color: '#10B981', fontWeight: 600 }}>
-              🤖 AI Confidence: 97% match
+              AI Confidence: 97% match
             </p>
           </div>
         </div>
@@ -171,7 +172,7 @@ function FloatingCard() {
               }} />
             ))}
           </div>
-          <span style={{ fontSize: '11px', color: '#475569' }}>Be the first to return something 🎯</span>
+          <span style={{ fontSize: '11px', color: '#475569' }}>Be the first to return something</span>
         </div>
       </motion.div>
       {/* Floating Badge – top right */}
@@ -426,7 +427,7 @@ export default function Hero() {
             {[
               { value: 'NITW',    label: 'Exclusive Campus' },
               { value: 'AI',      label: 'Smart Matching' },
-              { value: '🔒',     label: 'Privacy First' },
+              { value: <Lock size={26} color="#818CF8" style={{marginLeft: '-3px'}}/>, label: 'Privacy First' },
             ].map(stat => (
               <div key={stat.label}>
                 <p style={{

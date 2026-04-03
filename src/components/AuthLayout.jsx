@@ -40,7 +40,7 @@ function DashboardMockup() {
       {/* Greeting */}
       <div style={{ marginBottom:'24px' }}>
         <p style={{ fontSize:'11px', color:'#475569', fontWeight:600, letterSpacing:'0.06em', marginBottom:'4px' }}>DASHBOARD</p>
-        <h2 style={{ fontSize:'22px', fontWeight:800, color:'#F1F5F9', letterSpacing:'-0.03em' }}>Good morning, Warrior 👋</h2>
+        <h2 style={{ fontSize:'22px', fontWeight:800, color:'#F1F5F9', letterSpacing:'-0.03em' }}>Good morning, Warrior</h2>
         <p style={{ fontSize:'13px', color:'#64748B', marginTop:'4px' }}>AI matching is live and ready.</p>
       </div>
       {/* Match Alert */}
@@ -54,11 +54,17 @@ function DashboardMockup() {
         }}
       >
         <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:'8px' }}>
-          <span style={{ fontSize:'11px', fontWeight:700, color:'#10B981', letterSpacing:'0.04em' }}>🎉 NEW MATCH</span>
+          <span style={{ fontSize:'11px', fontWeight:700, color:'#10B981', letterSpacing:'0.04em', display:'flex', alignItems:'center', gap:'4px' }}>
+            <svg viewBox="0 0 24 24" fill="none" width="12" height="12"><path d="M12 2L15 9L22 9L16.5 14L18.5 22L12 17.5L5.5 22L7.5 14L2 9L9 9L12 2Z" fill="currentColor"/></svg>
+            NEW MATCH
+          </span>
           <span style={{ fontSize:'11px', padding:'2px 8px', borderRadius:'6px', background:'rgba(16,185,129,0.15)', color:'#10B981', fontWeight:600 }}>97% match</span>
         </div>
         <p style={{ fontSize:'14px', fontWeight:700, color:'#F1F5F9', marginBottom:'3px' }}>Student ID Card found!</p>
-        <p style={{ fontSize:'12px', color:'#64748B' }}>📍 CSE Department · 2 hours ago</p>
+        <p style={{ fontSize:'12px', color:'#64748B', display:'flex', alignItems:'center', gap:'4px' }}>
+          <svg viewBox="0 0 24 24" fill="none" width="12" height="12"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" stroke="currentColor" strokeWidth="2"/><circle cx="12" cy="10" r="3" stroke="currentColor" strokeWidth="2"/></svg>
+          CSE Department · 2 hours ago
+        </p>
       </motion.div>
       {/* Items List */}
       <p style={{ fontSize:'11px', color:'#475569', fontWeight:700, letterSpacing:'0.06em', marginBottom:'12px' }}>RECENT REPORTS</p>
@@ -81,7 +87,10 @@ function DashboardMockup() {
             </div>
             <div style={{ flex:1, minWidth:0 }}>
               <p style={{ fontSize:'13px', fontWeight:600, color:'#E2E8F0', marginBottom:'2px', overflow:'hidden', whiteSpace:'nowrap', textOverflow:'ellipsis' }}>{item.name}</p>
-              <p style={{ fontSize:'11px', color:'#475569' }}>📍 {item.loc} · {item.time}</p>
+              <p style={{ fontSize:'11px', color:'#475569', display:'flex', alignItems:'center', gap:'4px' }}>
+                <svg viewBox="0 0 24 24" fill="none" width="10" height="10"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" stroke="currentColor" strokeWidth="2"/><circle cx="12" cy="10" r="3" stroke="currentColor" strokeWidth="2"/></svg>
+                {item.loc} · {item.time}
+              </p>
             </div>
             <span style={{
               fontSize:'10px', fontWeight:700, padding:'3px 8px', borderRadius:'6px', flexShrink:0,

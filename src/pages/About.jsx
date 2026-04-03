@@ -1,6 +1,7 @@
 import React from 'react'
 import { motion } from 'framer-motion'
 import DashboardLayout from '../components/DashboardLayout'
+import { Search, HeartHandshake, Target, Bell, MessageSquare } from 'lucide-react'
 
 function FeatureCard({ icon, title, desc, delay, color }) {
   return (
@@ -37,7 +38,7 @@ export default function About() {
     <DashboardLayout>
       <div style={{ maxWidth:'1000px', margin:'0 auto', paddingBottom:'80px' }}>
         
-        {/* 🔥 Header and Vision Section */}
+        {/* Header and Vision Section */}
         <motion.div 
           initial={{ opacity:0, y:-20 }} animate={{ opacity:1, y:0 }}
           style={{ 
@@ -62,7 +63,7 @@ export default function About() {
 
         {/* 🧠 Our Vision */}
         <div style={{ textAlign:'center', marginBottom:'100px' }}>
-          <h2 style={{ fontSize:'28px', fontWeight:800, color:'var(--color-text-primary)', marginBottom:'20px' }}>Project Vision 🚀</h2>
+          <h2 style={{ fontSize:'28px', fontWeight:800, color:'var(--color-text-primary)', marginBottom:'20px' }}>Project Vision</h2>
           <div style={{ maxWidth:'720px', margin:'0 auto', fontSize:'16px', color:'var(--color-text-secondary)', lineHeight:1.8 }}>
             Our vision is to transform campus life by eliminating the stress of lost items. By integrating autonomous AI analysis, instant mobile notifications, and a transparent live feed, we aim to make recovery as seamless as reporting. We envision a campus where honesty is rewarded and finding an item is the start of a quick resolution.
           </div>
@@ -73,7 +74,7 @@ export default function About() {
           {/* Lost Section */}
           <motion.div initial={{ opacity:0, x:-30 }} animate={{ opacity:1, x:0 }} transition={{ duration:0.6 }}>
             <div style={{ display:'flex', alignItems:'center', gap:'12px', marginBottom:'24px' }}>
-              <div style={{ width:'40px', height:'40px', borderRadius:'12px', background:'rgba(244,63,94,0.12)', border:'1px solid rgba(244,63,94,0.2)', color:'#F43F5E', display:'flex', alignItems:'center', justifyContent:'center', fontSize:'20px' }}>🔎</div>
+              <div style={{ width:'40px', height:'40px', borderRadius:'12px', background:'rgba(244,63,94,0.12)', border:'1px solid rgba(244,63,94,0.2)', color:'#F43F5E', display:'flex', alignItems:'center', justifyContent:'center' }}><Search size={20} /></div>
               <h3 style={{ fontSize:'22px', fontWeight:800, color:'var(--color-text-primary)' }}>Reporting a Lost Item</h3>
             </div>
             <div style={{ display:'flex', flexDirection:'column', gap:'16px' }}>
@@ -86,7 +87,7 @@ export default function About() {
           {/* Found Section */}
           <motion.div initial={{ opacity:0, x:30 }} animate={{ opacity:1, x:0 }} transition={{ duration:0.6 }}>
             <div style={{ display:'flex', alignItems:'center', gap:'12px', marginBottom:'24px' }}>
-              <div style={{ width:'40px', height:'40px', borderRadius:'12px', background:'rgba(16,185,129,0.12)', border:'1px solid rgba(16,185,129,0.2)', color:'#10B981', display:'flex', alignItems:'center', justifyContent:'center', fontSize:'20px' }}>🤝</div>
+              <div style={{ width:'40px', height:'40px', borderRadius:'12px', background:'rgba(16,185,129,0.12)', border:'1px solid rgba(16,185,129,0.2)', color:'#10B981', display:'flex', alignItems:'center', justifyContent:'center' }}><HeartHandshake size={20} /></div>
               <h3 style={{ fontSize:'22px', fontWeight:800, color:'var(--color-text-primary)' }}>Reporting Found Items</h3>
             </div>
             <div style={{ display:'flex', flexDirection:'column', gap:'16px' }}>
@@ -97,13 +98,13 @@ export default function About() {
           </motion.div>
         </div>
 
-        {/* 🤖 Our Tech Pillars */}
+        {/* Our Matching Process */}
         <div style={{ marginBottom:'80px' }}>
           <h2 style={{ fontSize:'24px', fontWeight:800, color:'var(--color-text-primary)', marginBottom:'32px', textAlign:'center' }}>The Technology Inside</h2>
           <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit, minmax(280px, 1fr))', gap:'20px' }}>
-            <FeatureCard delay={0.1} color="#4F46E5" icon="🎯" title="Fuzzy Matching" desc="We use sophisticated string and semantic similarity algorithms to understand that 'blue shirt' and 'navy polo' describe the same item." />
-            <FeatureCard delay={0.2} color="#10B981" icon="🔔" title="Event-Driven Feed" desc="Every report triggers a real-time global broadcast. Live feeds update instantly via our active monitoring system across the campus." />
-            <FeatureCard delay={0.3} color="#F59E0B" icon="💬" title="Secure Handovers" desc="Matches happen privately. We provide the chat channel and the match logic—the community provides the trust. No more public phone numbers." />
+            <FeatureCard delay={0.1} color="#4F46E5" icon={<Target size={28} />} title="Fuzzy Matching" desc="We use sophisticated string and semantic similarity algorithms to understand that 'blue shirt' and 'navy polo' describe the same item." />
+            <FeatureCard delay={0.2} color="#10B981" icon={<Bell size={28} />} title="Event-Driven Feed" desc="Every report triggers a real-time global broadcast. Live feeds update instantly via our active monitoring system across the campus." />
+            <FeatureCard delay={0.3} color="#F59E0B" icon={<MessageSquare size={28} />} title="Secure Handovers" desc="Matches happen privately. We provide the chat channel and the match logic—the community provides the trust. No more public phone numbers." />
           </div>
         </div>
 

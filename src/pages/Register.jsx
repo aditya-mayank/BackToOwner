@@ -278,7 +278,7 @@ export default function Register() {
               />
             )}
             <span style={{ position:'relative', zIndex:1 }}>
-              {loading ? 'Creating account…' : allValid ? '🎉 Create Account' : 'Create Account'}
+              {loading ? 'Creating account…' : 'Create Account'}
             </span>
           </motion.button>
         </form>

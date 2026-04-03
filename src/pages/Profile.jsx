@@ -3,11 +3,12 @@ import { motion } from 'framer-motion'
 import { useAuth } from '../context/AuthContext'
 import DashboardLayout from '../components/DashboardLayout'
 import { userAPI } from '../api/endpoints.js'
+import { Rocket, HeartHandshake, Cpu, Mail, GraduationCap, Building, ShieldCheck, Lock, Key, Shield, MessageSquare, Award, Zap } from 'lucide-react'
 
 const BADGE_ITEMS = [
-  { label: 'Early Adopter', icon: '🚀', color: '#4F46E5' },
-  { label: 'Good Samaritan', icon: '🤝', color: '#10B981' },
-  { label: 'AI Believer', icon: '🤖', color: '#7C3AED' },
+  { label: 'Early Adopter', icon: <Rocket size={18}/>, color: '#4F46E5' },
+  { label: 'Good Samaritan', icon: <HeartHandshake size={18}/>, color: '#10B981' },
+  { label: 'AI Believer', icon: <Cpu size={18}/>, color: '#7C3AED' },
 ]
 
 function InfoRow({ label, value, icon }) {
@@ -137,7 +138,7 @@ export default function Profile() {
                   border: `1px solid ${userData?.role === 'admin' ? 'rgba(244,63,94,0.3)' : 'rgba(16,185,129,0.3)'}`,
                   textTransform: 'capitalize',
                 }}>
-                  {userData?.role === 'admin' ? '⚡' : '🎓'} {userData?.role || 'student'}
+                  {userData?.role === 'admin' ? <Zap size={14}/> : <GraduationCap size={14}/>} {userData?.role || 'student'}
                 </span>
                 <span style={{ fontSize: '13px', color: 'var(--color-text-muted)', fontWeight: 500 }}>NIT Warangal</span>
               </div>
@@ -199,10 +200,10 @@ export default function Profile() {
         >
           <h3 style={{ fontSize: '14px', fontWeight: 700, letterSpacing: '-0.01em', color: 'var(--color-text-primary)', marginBottom: '16px' }}>Account Information</h3>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-            <InfoRow label="Email Address" value={userData?.email || '—'} icon="📧" />
-            <InfoRow label="Roll Number" value={userData?.roll || '—'} icon="🎓" />
-            <InfoRow label="Institution" value="NIT Warangal" icon="🏛️" />
-            <InfoRow label="Account Role" value={userData?.role === 'admin' ? 'Administrator' : 'Student'} icon="🛡️" />
+            <InfoRow label="Email Address" value={userData?.email || '—'} icon={<Mail size={20}/>} />
+            <InfoRow label="Roll Number" value={userData?.roll || '—'} icon={<GraduationCap size={20}/>} />
+            <InfoRow label="Institution" value="NIT Warangal" icon={<Building size={20}/>} />
+            <InfoRow label="Account Role" value={userData?.role === 'admin' ? 'Administrator' : 'Student'} icon={<ShieldCheck size={20}/>} />
           </div>
         </motion.div>
 
@@ -216,7 +217,9 @@ export default function Profile() {
             borderRadius: '24px', padding: '28px',
           }}
         >
-          <h3 style={{ fontSize: '14px', fontWeight: 700, color: 'var(--color-text-primary)', marginBottom: '16px' }}>🏅 Badges Earned</h3>
+          <h3 style={{ fontSize: '14px', fontWeight: 700, color: 'var(--color-text-primary)', marginBottom: '16px', display:'flex', alignItems:'center', gap:'8px' }}>
+            <Award size={18} color="#F59E0B" /> Badges Earned
+          </h3>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
             {BADGE_ITEMS.map(b => (
               <motion.div
@@ -256,10 +259,10 @@ export default function Profile() {
           </div>
           <div style={{ display:'flex', flexDirection:'column', gap:'10px' }}>
             {[
-              { icon:'🔒', label:'NITW Domain Lock', desc:'Only @student.nitw.ac.in emails allowed' },
-              { icon:'🔑', label:'JWT Authentication', desc:'Token-based session, expires every 7 days' },
-              { icon:'🛡️', label:'Password Hashing', desc:'bcrypt with salt rounds (cost factor 10)' },
-              { icon:'💬', label:'Encrypted Chat', desc:'Messages accessible only to matched participants' },
+              { icon:<Lock size={20}/>, label:'NITW Domain Lock', desc:'Only @student.nitw.ac.in emails allowed' },
+              { icon:<Key size={20}/>, label:'JWT Authentication', desc:'Token-based session, expires every 7 days' },
+              { icon:<Shield size={20}/>, label:'Password Hashing', desc:'bcrypt with salt rounds (cost factor 10)' },
+              { icon:<MessageSquare size={20}/>, label:'Encrypted Chat', desc:'Messages accessible only to matched participants' },
             ].map(item => (
               <div key={item.label} style={{ display:'flex', alignItems:'center', gap:'14px', padding:'12px 14px', borderRadius:'12px', background:'rgba(255,255,255,0.02)', border:'1px solid var(--color-card-border)' }}>
                 <span style={{ fontSize:'18px' }}>{item.icon}</span>

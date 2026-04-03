@@ -247,7 +247,7 @@ export default function MyReports() {
                     <span style={{ fontSize:'11px', fontWeight:700, color: isMatched ? '#10B981' : isResolved ? '#94A3B8' : '#4F46E5', textTransform:'uppercase' }}>{report.status}</span>
                   </div>
                   <div style={{ display:'flex', gap:'10px' }}>
-                    {isMatched && <button onClick={() => navigate('/chats')} style={{ padding:'8px 16px', borderRadius:'8px', background:'#4F46E5', color:'#fff', border:'none', fontWeight:700, cursor:'pointer' }}>💬 Go to Chat</button>}
+                    {isMatched && <button onClick={() => navigate('/chats')} style={{ padding:'8px 16px', borderRadius:'8px', background:'#4F46E5', color:'#fff', border:'none', fontWeight:700, cursor:'pointer' }}>Go to Chat</button>}
                     {!isResolved && (
                       <button
                         onClick={() => setEditingReport(report)}
