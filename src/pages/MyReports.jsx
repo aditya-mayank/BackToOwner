@@ -74,6 +74,109 @@ function DetailModal({ report, onClose }) {
   )
 }
 
+/* ─── Edit Modal ─────────────────────────────────────────────────────── */
+function EditModal({ report, onClose, onRefresh }) {
+  const [formData, setFormData] = useState({
+    title: report?.itemName || '',
+    category: report?.category || '',
+    location: report?.location || '',
+    description: report?.description || ''
+  });
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (report) {
+      setFormData({
+        title: report.itemName || '',
+        category: report.category || '',
+        location: report.location || '',
+        description: report.description || ''
+      });
+    }
+  }, [report]);
+
+  if (!report) return null;
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    try {
+      const data = new FormData();
+      data.append('title', formData.title);
+      data.append('category', formData.category);
+      data.append('location', formData.location);
+      data.append('description', formData.description);
+      
+      await itemsAPI.editItem(report.id, data);
+      onRefresh();
+      onClose();
+    } catch (err) {
+      console.error('Edit error:', err);
+      alert('Failed to edit item.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <AnimatePresence>
+      <motion.div
+        initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+        onClick={onClose}
+        style={{ position:'fixed', inset:0, background:'rgba(0,0,0,0.65)', zIndex:1000, display:'flex', alignItems:'center', justifyContent:'center', padding:'20px' }}
+      >
+        <motion.div
+          initial={{ scale: 0.9, opacity: 0, y: 20 }}
+          animate={{ scale: 1, opacity: 1, y: 0 }}
+          exit={{ scale: 0.9, opacity: 0 }}
+          onClick={e => e.stopPropagation()}
+          style={{ background:'var(--color-card)', border:'1px solid var(--color-card-border)', borderRadius:'24px', padding:'32px', maxWidth:'520px', width:'100%', boxShadow:'0 24px 64px rgba(0,0,0,0.4)', maxHeight:'90vh', overflowY:'auto' }}
+        >
+          <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', marginBottom:'24px' }}>
+            <h2 style={{ fontSize:'22px', fontWeight:800, color:'var(--color-text-primary)' }}>Edit Report</h2>
+            <button onClick={onClose} style={{ background:'rgba(255,255,255,0.06)', border:'none', borderRadius:'10px', width:'36px', height:'36px', cursor:'pointer', color:'var(--color-text-muted)', fontSize:'18px' }}>×</button>
+          </div>
+
+          <form onSubmit={handleSubmit} style={{ display:'flex', flexDirection:'column', gap:'16px' }}>
+            <div>
+              <label style={{ fontSize:'12px', fontWeight:600, color:'var(--color-text-muted)', marginBottom:'6px', display:'block' }}>Title</label>
+              <input value={formData.title} onChange={e=>setFormData({...formData, title: e.target.value})} style={{ width:'100%', padding:'12px', borderRadius:'10px', background:'rgba(255,255,255,0.05)', border:'1px solid rgba(255,255,255,0.1)', color:'#fff' }} required />
+            </div>
+            
+            <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'16px' }}>
+              <div>
+                <label style={{ fontSize:'12px', fontWeight:600, color:'var(--color-text-muted)', marginBottom:'6px', display:'block' }}>Category</label>
+                <select value={formData.category} onChange={e=>setFormData({...formData, category: e.target.value})} style={{ width:'100%', padding:'12px', borderRadius:'10px', background:'var(--color-card)', border:'1px solid rgba(255,255,255,0.1)', color:'#fff' }}>
+                  <option value="Electronics">Electronics</option>
+                  <option value="Wallets & Cards">Wallets & Cards</option>
+                  <option value="Keys">Keys</option>
+                  <option value="Bags & Backpacks">Bags & Backpacks</option>
+                  <option value="Clothing">Clothing</option>
+                  <option value="Books">Books</option>
+                  <option value="Other">Other</option>
+                </select>
+              </div>
+              <div>
+                <label style={{ fontSize:'12px', fontWeight:600, color:'var(--color-text-muted)', marginBottom:'6px', display:'block' }}>Location</label>
+                <input value={formData.location} onChange={e=>setFormData({...formData, location: e.target.value})} style={{ width:'100%', padding:'12px', borderRadius:'10px', background:'rgba(255,255,255,0.05)', border:'1px solid rgba(255,255,255,0.1)', color:'#fff' }} required />
+              </div>
+            </div>
+
+            <div>
+              <label style={{ fontSize:'12px', fontWeight:600, color:'var(--color-text-muted)', marginBottom:'6px', display:'block' }}>Description</label>
+              <textarea value={formData.description} onChange={e=>setFormData({...formData, description: e.target.value})} rows="4" style={{ width:'100%', padding:'12px', borderRadius:'10px', background:'rgba(255,255,255,0.05)', border:'1px solid rgba(255,255,255,0.1)', color:'#fff', resize:'none' }} />
+            </div>
+
+            <button type="submit" disabled={loading} style={{ padding:'14px', borderRadius:'12px', background:'#4F46E5', color:'#fff', fontWeight:700, border:'none', cursor: loading ? 'not-allowed':'pointer', marginTop:'8px' }}>
+              {loading ? 'Saving...' : 'Save Changes'}
+            </button>
+          </form>
+        </motion.div>
+      </motion.div>
+    </AnimatePresence>
+  )
+}
+
 export default function MyReports() {
   const navigate = useNavigate()
   const { user } = useAuth()
@@ -81,6 +184,8 @@ export default function MyReports() {
   const [reports, setReports] = useState([])
   const [loading, setLoading] = useState(true)
   const [selectedReport, setSelectedReport] = useState(null)
+  const [editingReport, setEditingReport] = useState(null)
+  const [refreshTrigger, setRefreshTrigger] = useState(0)
 
   useEffect(() => {
     if (!user) return;
@@ -108,7 +213,7 @@ export default function MyReports() {
       }
     }
     loadReports();
-  }, [user]);
+  }, [user, refreshTrigger]);
 
   const filtered = reports.filter(r => {
     if (activeTab === 'Lost Reports') return r.type === 'lost' && r.status !== 'resolved'
@@ -120,6 +225,7 @@ export default function MyReports() {
   return (
     <DashboardLayout>
       <DetailModal report={selectedReport} onClose={() => setSelectedReport(null)} />
+      <EditModal report={editingReport} onClose={() => setEditingReport(null)} onRefresh={() => setRefreshTrigger(t=>t+1)} />
       <div style={{ maxWidth:'900px', margin:'0 auto' }}>
         <h1 style={{ fontSize:'32px', fontWeight:800, color:'var(--color-text-primary)' }}>My Reports</h1>
         <div style={{ display:'flex', gap:'12px', margin:'24px 0', borderBottom:'1px solid rgba(255,255,255,0.1)', paddingBottom:'16px' }}>
@@ -142,6 +248,14 @@ export default function MyReports() {
                   </div>
                   <div style={{ display:'flex', gap:'10px' }}>
                     {isMatched && <button onClick={() => navigate('/chats')} style={{ padding:'8px 16px', borderRadius:'8px', background:'#4F46E5', color:'#fff', border:'none', fontWeight:700, cursor:'pointer' }}>💬 Go to Chat</button>}
+                    {!isResolved && (
+                      <button
+                        onClick={() => setEditingReport(report)}
+                        style={{ padding:'8px 16px', borderRadius:'8px', border:'1px solid rgba(255,255,255,0.1)', background:'rgba(255,255,255,0.05)', color:'var(--color-text-primary)', cursor:'pointer', fontWeight:600, fontSize:'13px' }}
+                      >
+                        ✏️ Edit
+                      </button>
+                    )}
                     <button
                       onClick={() => setSelectedReport(report)}
                       style={{ padding:'8px 16px', borderRadius:'8px', border:'1px solid rgba(255,255,255,0.1)', background:'transparent', color:'var(--color-text-secondary)', cursor:'pointer', fontWeight:600, fontSize:'13px' }}

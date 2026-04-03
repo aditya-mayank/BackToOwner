@@ -99,9 +99,12 @@ export default function AdminDashboard() {
   const toggleUserStatus = async (userId, currentStatus) => {
     try {
       const newStatus = currentStatus === 'active' ? 'blocked' : 'active'
+      if (newStatus === 'blocked' && !window.confirm('Are you sure you want to block this user? They will be unable to log in and all active chats will be closed.')) {
+        return;
+      }
       setUsers(prev => prev.map(u => u._id === userId ? { ...u, accountStatus: newStatus } : u))
       
-      await adminAPI.blockUser(userId)
+      await adminAPI.blockUser(userId, newStatus)
       fetchData()
     } catch (err) {
       console.error('Failed to toggle user status:', err)

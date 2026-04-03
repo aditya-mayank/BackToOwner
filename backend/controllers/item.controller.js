@@ -259,3 +259,38 @@ export const getItemById = async (req, res) => {
   }
 };
 
+export const editItem = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { title, description, category, location, visibility } = req.body;
+    
+    // 1. Fetch item
+    const item = await Item.findById(id);
+    if (!item) {
+      return res.status(404).json({ success: false, message: 'Item not found' });
+    }
+
+    // 2. Verify ownership
+    if (item.reportedBy.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ success: false, message: 'Not authorized to edit this item' });
+    }
+
+    // 3. Update fields (text only, images are immutable currently)
+    if (title) item.title = title;
+    if (description) item.description = description;
+    if (category) item.category = category;
+    if (location) item.location = location;
+    
+    // Found items MUST remain private. Only lost items can be made public.
+    if (visibility && item.type === 'lost') {
+      item.visibility = visibility;
+    }
+
+    await item.save();
+
+    res.status(200).json({ success: true, message: 'Item updated successfully', item });
+  } catch (error) {
+    console.error('Error in editItem controller:', error.message);
+    res.status(500).json({ success: false, message: 'Server Error' });
+  }
+};

@@ -12,7 +12,6 @@ function ChatCard({ chat, index, me }) {
   const isClosed = chat.status === 'closed'
 
   const handleClick = () => {
-    if (isClosed) return // Block navigation into closed chats
     navigate(`/chat/${chat._id}`)
   }
 
@@ -23,7 +22,7 @@ function ChatCard({ chat, index, me }) {
       style={{
         background: 'var(--color-card)', border: '1px solid var(--color-card-border)',
         borderRadius: '20px', padding: '20px',
-        cursor: isClosed ? 'default' : 'pointer',
+        cursor: 'pointer',
         display: 'flex', alignItems: 'center', gap: '16px', transition: 'all .2s',
         position: 'relative', overflow: 'hidden',
         opacity: isClosed ? 0.6 : 1

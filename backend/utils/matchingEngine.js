@@ -116,8 +116,8 @@ export const evaluateItemMatch = (lostItem, foundItem) => {
 
   // ── DYNAMIC THRESHOLD ─────────────────────────────────────────────────────
   // If both have images, require lower threshold (images carry more weight).
-  // Pure text match requires 65+ to reduce false positives.
-  const threshold = bothHaveImages ? 55 : 65;
+  // Pure text match requires 60+ (eg. Title(40) + Category(20) = 60).
+  const threshold = bothHaveImages ? 50 : 60;
 
   return {
     score: totalScore,

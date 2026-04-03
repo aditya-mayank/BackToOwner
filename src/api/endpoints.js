@@ -58,6 +58,16 @@ export const itemsAPI = {
     } catch (error) {
       throw error;
     }
+  },
+  editItem: async (id, formData) => {
+    try {
+      const response = await axiosClient.put(`/items/${id}`, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
   }
 };
 
@@ -135,9 +145,9 @@ export const adminAPI = {
       throw error;
     }
   },
-  blockUser: async (userId) => {
+  blockUser: async (userId, targetStatus) => {
     try {
-      const response = await axiosClient.put(`/admin/users/${userId}/block`);
+      const response = await axiosClient.put(`/admin/users/${userId}/block`, { status: targetStatus });
       return response.data;
     } catch (error) {
       throw error;

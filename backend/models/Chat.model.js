@@ -8,7 +8,14 @@ const messageSchema = new mongoose.Schema({
   },
   text: {
     type: String,
-    required: true
+    required: false
+  },
+  attachmentUrl: {
+    type: String
+  },
+  attachmentType: {
+    type: String,
+    enum: ['image', 'video']
   },
   sentAt: {
     type: Date,
