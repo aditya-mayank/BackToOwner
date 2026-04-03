@@ -33,7 +33,7 @@ export const getAllItems = async (req, res) => {
 export const getAllUsers = async (req, res) => {
   try {
     console.log('[Admin Service] Fetching all campus users...');
-    const users = await User.find().select('_id name email role accountStatus roll createdAt');
+    const users = await User.find().select('_id name email role accountStatus roll createdAt lastLoginAt').sort({ createdAt: -1 });
     console.log(`[Admin Service] Successfully retrieved ${users.length} users.`);
     res.status(200).json({ success: true, count: users.length, users });
   } catch (error) {

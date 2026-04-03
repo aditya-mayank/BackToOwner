@@ -91,6 +91,9 @@ export default function AdminDashboard() {
 
   useEffect(() => {
     fetchData()
+    // Auto-refresh every 30 seconds so new users/items appear without manual refresh
+    const interval = setInterval(fetchData, 60000)
+    return () => clearInterval(interval)
   }, [])
 
   const toggleUserStatus = async (userId, currentStatus) => {
@@ -138,7 +141,11 @@ export default function AdminDashboard() {
           >
             <svg viewBox="0 0 24 24" fill="none" width="18" height="18"><path d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707m0-12.728l.707.707m11.314 11.314l.707.707M12 8a4 4 0 100 8 4 4 0 000-8z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
           </button>
-          <button onClick={fetchData} style={{ background:'rgba(255,255,255,0.05)', border:'1px solid rgba(255,255,255,0.1)', borderRadius:'12px', padding:'8px 16px', color:'#fff', cursor:'pointer', fontSize:'13px', fontWeight:600 }}>Refresh Data</button>
+          <div style={{ display:'flex', alignItems:'center', gap:'6px', padding:'6px 12px', background:'rgba(16,185,129,0.08)', border:'1px solid rgba(16,185,129,0.2)', borderRadius:'10px' }}>
+            <div style={{ width:'7px', height:'7px', borderRadius:'50%', background:'#10B981', animation:'live-pulse 2s infinite' }}/>
+            <span style={{ fontSize:'12px', fontWeight:700, color:'#10B981' }}>Live</span>
+          </div>
+          <button onClick={fetchData} style={{ background:'rgba(255,255,255,0.05)', border:'1px solid rgba(255,255,255,0.1)', borderRadius:'12px', padding:'8px 16px', color:'#fff', cursor:'pointer', fontSize:'13px', fontWeight:600 }}>Refresh</button>
           <button onClick={() => navigate('/dashboard')} style={{ background:'transparent', border:'1px solid rgba(255,255,255,0.1)', borderRadius:'12px', padding:'8px 16px', color:'var(--color-text-secondary)', cursor:'pointer' }} onMouseEnter={e=>e.currentTarget.style.color='#fff'} onMouseLeave={e=>e.currentTarget.style.color='var(--color-text-secondary)'}>
             Exit Admin
           </button>
@@ -236,6 +243,7 @@ export default function AdminDashboard() {
                   <tr style={{ background:'rgba(255,255,255,0.02)', borderBottom:'1px solid rgba(255,255,255,0.1)' }}>
                     <th style={{ padding:'16px 24px', fontSize:'12px', fontWeight:700, color:'var(--color-text-muted)', textTransform:'uppercase' }}>User Info</th>
                     <th style={{ padding:'16px 24px', fontSize:'12px', fontWeight:700, color:'var(--color-text-muted)', textTransform:'uppercase' }}>Role</th>
+                    <th style={{ padding:'16px 24px', fontSize:'12px', fontWeight:700, color:'var(--color-text-muted)', textTransform:'uppercase' }}>Last Login</th>
                     <th style={{ padding:'16px 24px', fontSize:'12px', fontWeight:700, color:'var(--color-text-muted)', textTransform:'uppercase' }}>Status</th>
                     <th style={{ padding:'16px 24px', fontSize:'12px', fontWeight:700, color:'var(--color-text-muted)', textTransform:'uppercase', textAlign:'right' }}>Access Control</th>
                   </tr>
@@ -254,6 +262,20 @@ export default function AdminDashboard() {
                           </div>
                         </td>
                         <td style={{ padding:'16px 24px', fontSize:'14px', color:'var(--color-text-secondary)', textTransform:'capitalize' }}>{u.role}</td>
+                        <td style={{ padding:'16px 24px' }}>
+                          {u.lastLoginAt ? (
+                            <div>
+                              <p style={{ fontSize:'13px', color:'var(--color-text-primary)', fontWeight:600 }}>
+                                {new Date(u.lastLoginAt).toLocaleDateString()}
+                              </p>
+                              <p style={{ fontSize:'11px', color:'var(--color-text-muted)' }}>
+                                {new Date(u.lastLoginAt).toLocaleTimeString([], { hour:'2-digit', minute:'2-digit' })}
+                              </p>
+                            </div>
+                          ) : (
+                            <span style={{ fontSize:'12px', color:'var(--color-text-muted)', fontStyle:'italic' }}>Never</span>
+                          )}
+                        </td>
                         <td style={{ padding:'16px 24px' }}>
                           <span style={{ padding:'4px 8px', borderRadius:'6px', background: u.accountStatus === 'active' ? 'rgba(16,185,129,0.1)' : 'rgba(244,63,94,0.1)', color: u.accountStatus === 'active' ? '#10B981' : '#F43F5E', fontWeight:600, fontSize:'12px', textTransform:'capitalize' }}>
                             {u.accountStatus}
@@ -344,6 +366,12 @@ export default function AdminDashboard() {
           </motion.div>
         )}
       </AnimatePresence>
+      <style>{`
+        @keyframes live-pulse {
+          0%, 100% { opacity: 1; transform: scale(1); }
+          50% { opacity: 0.4; transform: scale(1.5); }
+        }
+      `}</style>
     </div>
   )
 }

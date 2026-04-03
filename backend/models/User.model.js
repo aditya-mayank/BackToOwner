@@ -36,6 +36,10 @@ const userSchema = new mongoose.Schema(
       type: String,
       trim: true,
       default: null
+    },
+    lastLoginAt: {
+      type: Date,
+      default: null
     }
   },
   {
@@ -59,8 +63,9 @@ userSchema.methods.toSafeObject = function () {
 
 // Static method to easily find a user by email (case-insensitive)
 userSchema.statics.findByEmail = function (email) {
-  // Use a RegExp with 'i' flag to ensure case-insensitivity
-  return this.findOne({ email: new RegExp(`^${email}$`, 'i') });
+  // Escape special regex chars to prevent ReDoS, then do case-insensitive match
+  const escaped = email.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  return this.findOne({ email: new RegExp(`^${escaped}$`, 'i') });
 };
 
 const User = mongoose.model('User', userSchema);

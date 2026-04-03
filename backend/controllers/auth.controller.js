@@ -83,7 +83,10 @@ export const login = async (req, res) => {
       return res.status(403).json({ success: false, message: 'Account is blocked' });
     }
 
-    // 5. Generate JWT
+    // 5. Stamp last login time in DB
+    await User.updateOne({ _id: user._id }, { $set: { lastLoginAt: new Date() } });
+
+    // 6. Generate JWT
     const payload = {
       userId: user._id,
       email: user.email,
