@@ -282,6 +282,68 @@ export default function AdminDashboard() {
           </div>
         </div>
       </main>
+
+      {/* ─── View Details Modal ─────────────────────────────── */}
+      <AnimatePresence>
+        {viewModalOpen && selectedItem && (
+          <motion.div
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            onClick={() => setViewModalOpen(false)}
+            style={{ position:'fixed', inset:0, background:'rgba(0,0,0,0.7)', zIndex:1000, display:'flex', alignItems:'center', justifyContent:'center', padding:'20px' }}
+          >
+            <motion.div
+              initial={{ scale:0.92, y:20, opacity:0 }} animate={{ scale:1, y:0, opacity:1 }} exit={{ scale:0.92, opacity:0 }}
+              onClick={e => e.stopPropagation()}
+              style={{ background:'var(--color-card)', border:'1px solid var(--color-card-border)', borderRadius:'24px', padding:'32px', maxWidth:'560px', width:'100%', boxShadow:'0 24px 64px rgba(0,0,0,0.5)', maxHeight:'90vh', overflowY:'auto' }}
+            >
+              {/* Header */}
+              <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', marginBottom:'24px' }}>
+                <div>
+                  <h2 style={{ fontSize:'22px', fontWeight:800, color:'var(--color-text-primary)', marginBottom:'8px' }}>{selectedItem.title}</h2>
+                  <span style={{ fontSize:'11px', fontWeight:700, padding:'3px 10px', borderRadius:'20px',
+                    background: selectedItem.status === 'resolved' ? 'rgba(16,185,129,0.15)' : 'rgba(79,70,229,0.15)',
+                    color: selectedItem.status === 'resolved' ? '#10B981' : '#818CF8',
+                    textTransform:'uppercase', letterSpacing:'0.05em'
+                  }}>{selectedItem.status}</span>
+                </div>
+                <button onClick={() => setViewModalOpen(false)} style={{ background:'rgba(255,255,255,0.06)', border:'none', borderRadius:'10px', width:'36px', height:'36px', cursor:'pointer', color:'var(--color-text-muted)', fontSize:'20px', display:'flex', alignItems:'center', justifyContent:'center' }}>×</button>
+              </div>
+
+              {/* Image */}
+              {selectedItem.imageUrl && (
+                <img src={selectedItem.imageUrl} alt={selectedItem.title}
+                  style={{ width:'100%', height:'200px', objectFit:'cover', borderRadius:'16px', marginBottom:'20px', border:'1px solid var(--color-card-border)' }}
+                />
+              )}
+
+              {/* Info Grid */}
+              <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'16px', marginBottom:'20px' }}>
+                {[
+                  { label:'Reporter', value: selectedItem.reportedBy?.name || 'Unknown' },
+                  { label:'Type',     value: selectedItem.type },
+                  { label:'Category', value: selectedItem.category },
+                  { label:'Location', value: selectedItem.location },
+                  { label:'Visibility', value: selectedItem.visibility || '—' },
+                  { label:'Date Filed', value: new Date(selectedItem.createdAt).toLocaleDateString() },
+                ].map(({ label, value }) => (
+                  <div key={label}>
+                    <p style={{ fontSize:'10px', fontWeight:700, color:'var(--color-text-muted)', textTransform:'uppercase', letterSpacing:'0.06em', marginBottom:'3px' }}>{label}</p>
+                    <p style={{ fontSize:'14px', fontWeight:600, color:'var(--color-text-primary)', textTransform:'capitalize' }}>{value}</p>
+                  </div>
+                ))}
+              </div>
+
+              {/* Description */}
+              {selectedItem.description && (
+                <div style={{ padding:'16px', background:'rgba(255,255,255,0.03)', borderRadius:'12px', border:'1px solid var(--color-card-border)' }}>
+                  <p style={{ fontSize:'10px', fontWeight:700, color:'var(--color-text-muted)', textTransform:'uppercase', letterSpacing:'0.06em', marginBottom:'8px' }}>Description</p>
+                  <p style={{ fontSize:'14px', color:'var(--color-text-secondary)', lineHeight:1.7 }}>{selectedItem.description}</p>
+                </div>
+              )}
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   )
 }

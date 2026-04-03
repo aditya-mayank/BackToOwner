@@ -147,6 +147,7 @@ export default function Dashboard() {
   const [loaded, setLoaded] = useState(false)
   const [dynamicStats, setDynamicStats] = useState({ active: 0, matches: 0, resolved: 0, daysActive: 1 })
   const [dynamicActivity, setDynamicActivity] = useState([])
+  const [campusFeed, setCampusFeed] = useState([])
 
   const fetchDashboardData = async () => {
     try {
@@ -163,7 +164,8 @@ export default function Dashboard() {
       // Accurate Stats from DB
       const active = personalItems.filter(i => (i.status || '').toLowerCase() === 'active').length;
       const matched = personalItems.filter(i => (i.status || '').toLowerCase() === 'matched').length;
-      const resolved = campusItems.filter(i => (i.status || '').toLowerCase() === 'resolved').length;
+      // Each resolution marks both the lost+found item as 'resolved' → raw count is 2× actual
+      const resolved = Math.floor(campusItems.filter(i => (i.status || '').toLowerCase() === 'resolved').length / 2);
       
       const creation = new Date(user.createdAt || Date.now());
       const days = Math.max(1, Math.floor((Date.now() - creation.getTime()) / (1000 * 3600 * 24)));
@@ -180,6 +182,7 @@ export default function Dashboard() {
       }));
       
       setDynamicActivity(mappedActs);
+      setCampusFeed(campusItems.filter(i => i.visibility === 'public' && i.status === 'active').slice(0, 10));
     } catch (err) {
       console.error('[Dashboard] Sync Error:', err);
     } finally {
@@ -250,6 +253,48 @@ export default function Dashboard() {
           </button>
         </motion.div>
 
+        {/* ─── Campus Live Feed ───────────────────────────────────── */}
+        <motion.div
+          initial={{ opacity:0, y:20 }} animate={{ opacity:1, y:0 }} transition={{ delay:0.75 }}
+          style={{ background:'var(--color-card)', border:'1px solid var(--color-card-border)', borderRadius:'28px', padding:'32px', boxShadow:'var(--card-shadow)', marginTop:'32px' }}
+        >
+          <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:'8px' }}>
+            <div>
+              <h2 style={{ fontSize:'18px', fontWeight:800, color:'var(--color-text-primary)' }}>🌐 Campus Live Feed</h2>
+              <p style={{ fontSize:'13px', color:'var(--color-text-muted)', marginTop:'4px' }}>Public active lost &amp; found reports across campus</p>
+            </div>
+            <div style={{ display:'flex', alignItems:'center', gap:'6px' }}>
+              <div style={{ width:'8px', height:'8px', borderRadius:'50%', background:'#10B981', animation:'live-pulse 2s infinite' }}/>
+              <span style={{ fontSize:'12px', fontWeight:700, color:'#10B981' }}>Live</span>
+            </div>
+          </div>
+          <div style={{ marginTop:'20px', display:'flex', flexDirection:'column', gap:'10px' }}>
+            {!loaded ? [1,2,3].map(i => <SkeletonItem key={i} />) :
+              campusFeed.length > 0 ? campusFeed.map((item, i) => (
+                <motion.div
+                  key={item._id}
+                  initial={{ opacity:0, x:-12 }} animate={{ opacity:1, x:0 }} transition={{ delay: i * 0.05 }}
+                  style={{ display:'flex', gap:'14px', alignItems:'center', padding:'14px 16px', borderRadius:'14px', background:'rgba(255,255,255,0.02)', border:'1px solid var(--color-card-border)' }}
+                >
+                  <div style={{ width:'40px', height:'40px', borderRadius:'12px', flexShrink:0, background: item.type==='lost' ? 'rgba(124,58,237,0.1)' : 'rgba(16,185,129,0.1)', display:'flex', alignItems:'center', justifyContent:'center', fontSize:'18px' }}>
+                    {item.type === 'lost' ? '🔍' : '📦'}
+                  </div>
+                  <div style={{ flex:1, minWidth:0 }}>
+                    <p style={{ fontSize:'14px', fontWeight:600, color:'var(--color-text-primary)', whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis' }}>{item.title}</p>
+                    <p style={{ fontSize:'12px', color:'var(--color-text-muted)' }}>{item.category} • {item.location}</p>
+                  </div>
+                  <div style={{ display:'flex', flexDirection:'column', alignItems:'flex-end', gap:'4px', flexShrink:0 }}>
+                    <span style={{ fontSize:'10px', fontWeight:700, padding:'2px 8px', borderRadius:'6px', background: item.type==='lost' ? 'rgba(124,58,237,0.15)' : 'rgba(16,185,129,0.15)', color: item.type==='lost' ? '#A78BFA' : '#34D399', textTransform:'uppercase' }}>{item.type}</span>
+                    <span style={{ fontSize:'11px', color:'var(--color-text-muted)' }}>{new Date(item.createdAt).toLocaleDateString()}</span>
+                  </div>
+                </motion.div>
+              )) : (
+                <div style={{ padding:'32px', textAlign:'center', color:'var(--color-text-muted)', fontSize:'14px' }}>No public reports yet on campus.</div>
+              )
+            }
+          </div>
+        </motion.div>
+
         <style>{`
           @keyframes skeleton-pulse {
             0% { opacity: 0.5; }
@@ -258,6 +303,10 @@ export default function Dashboard() {
           }
           .skeleton-animate {
             animation: skeleton-pulse 1.5s infinite ease-in-out;
+          }
+          @keyframes live-pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.4; transform: scale(1.5); }
           }
         `}</style>
       </div>

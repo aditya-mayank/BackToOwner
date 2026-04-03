@@ -78,15 +78,16 @@ app.use('/api/notifications', notificationRoutes);
 // Admin Auto-Seeder Utility
 const seedAdmin = async () => {
   try {
-    const email = 'admin123@nitw.ac.in';
+    const email    = (process.env.ADMIN_EMAIL    || 'admin123@nitw.ac.in').toLowerCase();
+    const password =  process.env.ADMIN_PASSWORD || 'admin123';
     const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash('admin123', salt);
-    
-    let adminUser = await User.findOne({ email: email.toLowerCase() });
+    const hashedPassword = await bcrypt.hash(password, salt);
+
+    let adminUser = await User.findOne({ email });
     if (!adminUser) {
       console.log('[Seeder] No admin found. Generating master account...');
       adminUser = new User({
-        name: 'Master Admin', email: email.toLowerCase(),
+        name: 'Master Admin', email,
         passwordHash: hashedPassword, role: 'admin', accountStatus: 'active'
       });
       await adminUser.save();

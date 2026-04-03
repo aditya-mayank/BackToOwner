@@ -236,10 +236,47 @@ export default function Profile() {
           </div>
         </motion.div>
 
-        {/* Sign Out */}
+        {/* Security Status */}
         <motion.div
           initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.45, duration: 0.5 }}
+          style={{
+            background: 'var(--color-card)',
+            border: '1px solid rgba(16,185,129,0.2)',
+            borderRadius: '24px', padding: '28px',
+            marginTop: '20px',
+          }}
+        >
+          <div style={{ display:'flex', alignItems:'center', gap:'10px', marginBottom:'18px' }}>
+            <div style={{ width:'32px', height:'32px', borderRadius:'10px', background:'rgba(16,185,129,0.12)', display:'flex', alignItems:'center', justifyContent:'center' }}>
+              <svg viewBox="0 0 24 24" fill="none" width="16" height="16"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" stroke="#10B981" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+            </div>
+            <h3 style={{ fontSize:'14px', fontWeight:700, color:'var(--color-text-primary)' }}>Security Status</h3>
+            <span style={{ marginLeft:'auto', fontSize:'11px', fontWeight:700, padding:'2px 10px', borderRadius:'20px', background:'rgba(16,185,129,0.12)', color:'#10B981', border:'1px solid rgba(16,185,129,0.25)' }}>● Secure</span>
+          </div>
+          <div style={{ display:'flex', flexDirection:'column', gap:'10px' }}>
+            {[
+              { icon:'🔒', label:'NITW Domain Lock', desc:'Only @student.nitw.ac.in emails allowed' },
+              { icon:'🔑', label:'JWT Authentication', desc:'Token-based session, expires every 7 days' },
+              { icon:'🛡️', label:'Password Hashing', desc:'bcrypt with salt rounds (cost factor 10)' },
+              { icon:'💬', label:'Encrypted Chat', desc:'Messages accessible only to matched participants' },
+            ].map(item => (
+              <div key={item.label} style={{ display:'flex', alignItems:'center', gap:'14px', padding:'12px 14px', borderRadius:'12px', background:'rgba(255,255,255,0.02)', border:'1px solid var(--color-card-border)' }}>
+                <span style={{ fontSize:'18px' }}>{item.icon}</span>
+                <div style={{ flex:1 }}>
+                  <p style={{ fontSize:'13px', fontWeight:600, color:'var(--color-text-primary)', marginBottom:'1px' }}>{item.label}</p>
+                  <p style={{ fontSize:'11px', color:'var(--color-text-muted)' }}>{item.desc}</p>
+                </div>
+                <svg viewBox="0 0 24 24" fill="none" width="16" height="16"><path d="M20 6L9 17l-5-5" stroke="#10B981" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+              </div>
+            ))}
+          </div>
+        </motion.div>
+
+        {/* Sign Out */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.55, duration: 0.5 }}
           style={{ marginTop: '20px' }}
         >
           <button 

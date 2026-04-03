@@ -133,15 +133,19 @@ export const getSystemStats = async (req, res) => {
       Chat.countDocuments({ status: 'active' })
     ]);
 
+    // Each resolved chat marks 2 items (lost + found) as resolved.
+    // Divide by 2 to get the true number of successful resolutions.
+    const trueResolved = Math.floor(resolvedItems / 2);
+
     const stats = {
       lostItems,
       foundItems,
-      resolvedItems,
+      resolvedItems: trueResolved,
       activeItems,
       activeUsers,
       activeChats
     };
-    console.log(`[Admin Service] Compilation successful. Tracking ${resolvedItems} resolved student items.`);
+    console.log(`[Admin Service] Compilation successful. Tracking ${trueResolved} resolved student items (${resolvedItems} raw / 2).`);
     console.log('[Admin Service] Stats generated:', stats);
     res.status(200).json({ success: true, stats });
   } catch (error) {

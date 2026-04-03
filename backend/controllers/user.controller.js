@@ -10,9 +10,11 @@ export const getProfile = async (req, res) => {
     
     // 2. Calculate Stats
     const totalReports = await Item.countDocuments({ reportedBy: userId });
-    const resolvedReports = await Item.countDocuments({ reportedBy: userId, status: 'resolved' });
-    
-    // Calculate Match Rate (simple % of resolved items)
+    const rawResolved  = await Item.countDocuments({ reportedBy: userId, status: 'resolved' });
+    // Each resolution marks 2 items (lost + found). Halve to get true count.
+    const resolvedReports = Math.floor(rawResolved / 2);
+
+    // Match rate: resolved resolutions vs total reports filed
     const matchRate = totalReports > 0 ? Math.round((resolvedReports / totalReports) * 100) : 0;
 
     res.status(200).json({

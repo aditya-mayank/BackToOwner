@@ -155,12 +155,46 @@ function Step1({ data, setData }) {
   const [focusedName, setFocusedName]   = useState(false)
   const [focusedDesc, setFocusedDesc]   = useState(false)
   const [focusCat,    setFocusCat]      = useState(false)
+  const [preview,     setPreview]       = useState(null)
+  const fileRef = React.useRef()
   const MIN_DESC = 30
+
+  const handleImage = (e) => {
+    const file = e.target.files[0]
+    if (!file) return
+    setData(d => ({ ...d, image: file }))
+    setPreview(URL.createObjectURL(file))
+  }
+
   return (
     <div>
       <h2 style={{ fontSize:'22px', fontWeight:800, letterSpacing:'-0.03em', color:'var(--color-text-primary)', marginBottom:'4px' }}>Tell us about the item</h2>
       <p style={{ fontSize:'14px', color:'var(--color-text-secondary)', marginBottom:'28px' }}>Be as specific as possible — it helps our AI match faster.</p>
-      {/* Category */}
+
+      {/* Photo Upload */}
+      <FieldWrap>
+        <Label>Photo (Optional)</Label>
+        <div
+          onClick={() => fileRef.current.click()}
+          style={{ border:'2px dashed rgba(79,70,229,0.4)', borderRadius:'14px', padding:'20px', cursor:'pointer', display:'flex', alignItems:'center', gap:'16px', background:'rgba(79,70,229,0.03)', transition:'border-color .2s' }}
+          onMouseEnter={e => e.currentTarget.style.borderColor='rgba(79,70,229,0.7)'}
+          onMouseLeave={e => e.currentTarget.style.borderColor='rgba(79,70,229,0.4)'}
+        >
+          {preview ? (
+            <img src={preview} alt="preview" style={{ width:'72px', height:'72px', objectFit:'cover', borderRadius:'10px', flexShrink:0 }} />
+          ) : (
+            <div style={{ width:'72px', height:'72px', borderRadius:'10px', background:'rgba(79,70,229,0.1)', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
+              <svg viewBox="0 0 24 24" fill="none" width="28" height="28"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12" stroke="#818CF8" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+            </div>
+          )}
+          <div>
+            <p style={{ fontSize:'14px', fontWeight:600, color:'var(--color-text-primary)', marginBottom:'2px' }}>{preview ? 'Photo selected — click to change' : 'Click to upload a photo'}</p>
+            <p style={{ fontSize:'12px', color:'var(--color-text-muted)' }}>JPG, PNG or WEBP • Max 5MB</p>
+          </div>
+        </div>
+        <input ref={fileRef} type="file" accept="image/*" style={{ display:'none' }} onChange={handleImage} />
+      </FieldWrap>
+
       <FieldWrap>
         <Label>Item Category</Label>
         <div style={{ position:'relative' }}>
@@ -511,7 +545,7 @@ export default function ReportLost() {
   const [success, setSuccess] = useState(false)
   const [data, setData] = useState({
     category: '', customCategory: '', itemName: '', description: '',
-    location: '', customLocation: '', dateLost: '', visibility: 'public',
+    location: '', customLocation: '', dateLost: '', visibility: 'public', image: null,
   })
   const go = (next) => {
     const err = validate(step, data)
@@ -544,6 +578,7 @@ export default function ReportLost() {
       formData.append('location', loc)
 
       formData.append('visibility', data.visibility)
+      if (data.image) formData.append('image', data.image)
 
       await itemsAPI.reportLost(formData)
 

@@ -11,22 +11,28 @@ function ChatCard({ chat, index, me }) {
   const lastMsg = chat.messages?.[chat.messages.length - 1]
   const isClosed = chat.status === 'closed'
 
+  const handleClick = () => {
+    if (isClosed) return // Block navigation into closed chats
+    navigate(`/chat/${chat._id}`)
+  }
+
   return (
     <motion.div
       initial={{ opacity:0, y:12 }} animate={{ opacity:1, y:0 }} transition={{ delay: index * 0.05 }}
-      onClick={() => navigate(`/chat/${chat._id}`)}
+      onClick={handleClick}
       style={{
         background: 'var(--color-card)', border: '1px solid var(--color-card-border)',
-        borderRadius: '20px', padding: '20px', cursor: 'pointer',
+        borderRadius: '20px', padding: '20px',
+        cursor: isClosed ? 'default' : 'pointer',
         display: 'flex', alignItems: 'center', gap: '16px', transition: 'all .2s',
         position: 'relative', overflow: 'hidden',
-        opacity: isClosed ? 0.7 : 1
+        opacity: isClosed ? 0.6 : 1
       }}
-      whileHover={{ y: -4, borderColor: isClosed ? 'var(--color-card-border)' : '#4F46E5', boxShadow: '0 12px 32px rgba(0,0,0,0.2)' }}
+      whileHover={isClosed ? {} : { y: -4, borderColor: '#4F46E5', boxShadow: '0 12px 32px rgba(0,0,0,0.2)' }}
     >
-      <div style={{ position:'absolute', top:0, left:0, width:'4px', height:'100%', background: isClosed ? 'var(--color-text-muted)' : '#4F46E5' }}/>
+      <div style={{ position:'absolute', top:0, left:0, width:'4px', height:'100%', background: isClosed ? '#10B981' : '#4F46E5' }}/>
 
-      <div style={{ width: '52px', height: '52px', borderRadius: '14px', background: isClosed ? 'rgba(255,255,255,0.05)' : 'rgba(79,70,229,0.1)', border: '1px solid rgba(79,70,229,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '20px', color: isClosed ? 'var(--color-text-muted)' : '#818CF8', flexShrink: 0 }}>
+      <div style={{ width: '52px', height: '52px', borderRadius: '14px', background: isClosed ? 'rgba(16,185,129,0.08)' : 'rgba(79,70,229,0.1)', border: `1px solid ${isClosed ? 'rgba(16,185,129,0.2)' : 'rgba(79,70,229,0.2)'}`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '20px', color: isClosed ? '#10B981' : '#818CF8', flexShrink: 0 }}>
         {otherParticipant.name.charAt(0).toUpperCase()}
       </div>
       
@@ -40,19 +46,25 @@ function ChatCard({ chat, index, me }) {
           </span>
         </div>
         <p style={{ fontSize: '13px', color: 'var(--color-text-secondary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', marginBottom: '6px' }}>
-          {isClosed ? 'Conversation closed (Item Returned)' : (lastMsg ? lastMsg.text : `Connect for ${chat.lostItemId?.title || 'item'}`)}
+          {isClosed ? '✅ Item returned — conversation closed' : (lastMsg ? lastMsg.text : `Connect for ${chat.lostItemId?.title || 'item'}`)}
         </p>
         <div style={{ display: 'flex', gap: '8px' }}>
           <span style={{ fontSize: '10px', fontWeight: 700, padding: '2px 8px', borderRadius: '6px', background: 'rgba(255,255,255,0.05)', color: 'var(--color-text-muted)', textTransform: 'uppercase' }}>
             {chat.lostItemId?.category || 'General'}
           </span>
           <span style={{ fontSize: '10px', fontWeight: 700, padding: '2px 8px', borderRadius: '6px', background: isClosed ? 'rgba(16,185,129,0.1)' : 'rgba(79,70,229,0.1)', color: isClosed ? '#10B981' : '#818CF8', textTransform: 'uppercase' }}>
-            {chat.status}
+            {isClosed ? 'Resolved' : 'Active'}
           </span>
         </div>
       </div>
       
-      <svg viewBox="0 0 24 24" fill="none" width="18" height="18" style={{ color: 'var(--color-text-muted)', flexShrink: 0 }}><path d="M9 18l6-6-6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+      {/* Only show chevron for active chats */}
+      {!isClosed && (
+        <svg viewBox="0 0 24 24" fill="none" width="18" height="18" style={{ color: 'var(--color-text-muted)', flexShrink: 0 }}><path d="M9 18l6-6-6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+      )}
+      {isClosed && (
+        <svg viewBox="0 0 24 24" fill="none" width="18" height="18" style={{ color: '#10B981', flexShrink: 0 }}><path d="M20 6L9 17l-5-5" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+      )}
     </motion.div>
   )
 }

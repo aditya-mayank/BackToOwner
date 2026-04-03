@@ -209,7 +209,9 @@ export const searchItems = async (req, res) => {
     }
     
     if (location) {
-      query.location = { $regex: new RegExp(location, 'i') };
+      // Escape special regex chars to prevent ReDoS
+      const escapedLocation = location.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      query.location = { $regex: new RegExp(escapedLocation, 'i') };
     }
 
     if (keyword) {

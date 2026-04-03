@@ -51,7 +51,7 @@ export const register = async (req, res) => {
 
   } catch (error) {
     console.error('Error in register controller:', error.message);
-    res.status(500).json({ success: false, message: error.message, stack: error.stack });
+    res.status(500).json({ success: false, message: 'Server Error' });
   }
 };
 
@@ -90,9 +90,13 @@ export const login = async (req, res) => {
       role: user.role
     };
 
+    if (!process.env.JWT_SECRET) {
+      throw new Error('JWT_SECRET environment variable is not set');
+    }
+
     const token = jwt.sign(
-      payload, 
-      process.env.JWT_SECRET || 'fallback-secret-key-dev', 
+      payload,
+      process.env.JWT_SECRET,
       { expiresIn: '7d' }
     );
 

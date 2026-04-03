@@ -108,8 +108,8 @@ function SidebarContent({ collapsed, setCollapsed, onClose }) {
 
   return (
     <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', background: 'var(--color-card)', borderRight: '1px solid var(--color-card-border)', padding: '20px 12px' }}>
-      {/* Sidebar header: logo + hamburger toggle */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: collapsed ? 'center' : 'space-between', marginBottom: '28px', padding: '0 4px' }}>
+      {/* Sidebar header: logo + hamburger collapse toggle */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px', padding: '0 4px' }}>
         {!collapsed && (
           <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: '9px', textDecoration: 'none' }}>
             <div style={{ width: '30px', height: '30px', borderRadius: '8px', background: 'linear-gradient(135deg,#4F46E5,#6366F1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -118,7 +118,7 @@ function SidebarContent({ collapsed, setCollapsed, onClose }) {
             <span style={{ fontSize: '14px', fontWeight: 700, color: 'var(--color-text-primary)' }}>BackToOwner</span>
           </Link>
         )}
-        {/* Hamburger — toggles collapse on desktop */}
+        {/* Hamburger — always shown, toggles collapse */}
         {setCollapsed && (
           <button
             onClick={() => setCollapsed(v => !v)}
@@ -130,12 +130,33 @@ function SidebarContent({ collapsed, setCollapsed, onClose }) {
         )}
       </div>
 
-      <div style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: collapsed ? '10px 0' : '12px', borderRadius: '14px', background: 'rgba(79,70,229,0.07)', marginBottom: '20px' }}>
-        <div style={{ width: '38px', height: '38px', borderRadius: '12px', background: 'linear-gradient(135deg, #4F46E5, #8B5CF6)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontSize: '14px', fontWeight: 800 }}>
+      {/* User card — click to go to Profile + Logout right below */}
+      <motion.div
+        onClick={() => { navigate('/profile'); if (onClose) onClose(); }}
+        whileHover={{ scale: 1.02 }}
+        style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: collapsed ? '10px 0' : '12px', borderRadius: '14px', background: 'rgba(79,70,229,0.07)', marginBottom: '6px', cursor: 'pointer', justifyContent: collapsed ? 'center' : 'flex-start' }}
+        title="Go to Profile"
+      >
+        <div style={{ width: '38px', height: '38px', borderRadius: '12px', background: 'linear-gradient(135deg, #4F46E5, #8B5CF6)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontSize: '14px', fontWeight: 800, flexShrink: 0 }}>
           {user?.name?.charAt(0) || 'U'}
         </div>
-        {!collapsed && <div><p style={{ fontSize:'13px', fontWeight:700, color:'var(--color-text-primary)' }}>{user?.name || 'Student'}</p></div>}
-      </div>
+        {!collapsed && (
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <p style={{ fontSize:'13px', fontWeight:700, color:'var(--color-text-primary)', whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis' }}>{user?.name || 'Student'}</p>
+            <p style={{ fontSize:'11px', color:'var(--color-text-muted)', fontWeight:500 }}>View Profile →</p>
+          </div>
+        )}
+      </motion.div>
+
+      {/* Logout — always visible, no scrolling needed */}
+      <motion.button
+        onClick={handleLogout}
+        whileHover={{ scale: 1.02 }}
+        style={{ width: '100%', padding: '8px 14px', borderRadius: '10px', border: '1px solid rgba(244,63,94,0.2)', background: 'rgba(244,63,94,0.04)', color: '#F43F5E', display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer', justifyContent: collapsed ? 'center' : 'flex-start', marginBottom: '16px' }}
+      >
+        <svg viewBox="0 0 24 24" fill="none" width="16" height="16"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9" stroke="currentColor" strokeWidth="2"/></svg>
+        {!collapsed && <span style={{ fontSize: '13px', fontWeight: 600 }}>Logout</span>}
+      </motion.button>
 
       <nav style={{ flex: 1, overflowY: 'auto' }}>
         {dynamicNav.map(item => <NavItem key={item.id} item={item} collapsed={collapsed} onClick={onClose} />)}
@@ -144,17 +165,14 @@ function SidebarContent({ collapsed, setCollapsed, onClose }) {
         )}
       </nav>
 
-      <div style={{ borderTop: '1px solid var(--color-card-border)', paddingTop: '12px', display:'flex', flexDirection:'column', gap:'8px' }}>
+      {/* Theme toggle — bottom, less frequently used */}
+      <div style={{ borderTop: '1px solid var(--color-card-border)', paddingTop: '12px' }}>
         <motion.button onClick={handleToggleTheme} whileHover={{ scale: 1.02 }} style={{ width: '100%', padding: '10px 14px', borderRadius: '12px', border: '1px solid var(--color-card-border)', background: 'transparent', color: 'var(--color-text-secondary)', display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer', justifyContent: collapsed ? 'center' : 'flex-start' }}>
           {isDark
             ? <svg viewBox="0 0 24 24" fill="none" width="18" height="18"><path d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707m0-12.728l.707.707m11.314 11.314l.707.707M12 8a4 4 0 100 8 4 4 0 000-8z" stroke="currentColor" strokeWidth="2"/></svg>
             : <svg viewBox="0 0 24 24" fill="none" width="18" height="18"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
           }
           {!collapsed && <span style={{ fontSize: '14px', fontWeight: 500 }}>{isDark ? 'Switch to Light' : 'Switch to Dark'}</span>}
-        </motion.button>
-        <motion.button onClick={handleLogout} whileHover={{ scale: 1.02 }} style={{ width: '100%', padding: '10px 14px', borderRadius: '12px', border: 'none', background: 'transparent', color: '#F43F5E', display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer', justifyContent: collapsed ? 'center' : 'flex-start' }}>
-          <svg viewBox="0 0 24 24" fill="none" width="18" height="18"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9" stroke="currentColor" strokeWidth="2"/></svg>
-          {!collapsed && <span style={{ fontSize: '14px', fontWeight: 500 }}>Logout</span>}
         </motion.button>
       </div>
     </div>
@@ -179,13 +197,13 @@ export default function DashboardLayout({ children }) {
         )}
       </AnimatePresence>
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0 }}>
-        {/* Mobile top bar — hamburger toggles mobileOpen */}
+        {/* Mobile top bar — no hamburger, just brand + avatar */}
         <div className="lg:hidden" style={{ height: '60px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 20px', background: 'var(--color-card)', borderBottom: '1px solid var(--color-card-border)' }}>
-          <button onClick={() => setMobileOpen(v => !v)} style={{ background: 'none', border: 'none', color: 'var(--color-text-secondary)', cursor: 'pointer' }}>
-            <svg viewBox="0 0 24 24" fill="none" width="22" height="22"><path d="M3 12h18M3 6h18M3 18h18" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/></svg>
-          </button>
-          <span style={{ fontSize:'15px', fontWeight: 700 }}>BackToOwner</span>
-          <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: '#4F46E5', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff' }}>{user?.name?.charAt(0)}</div>
+          <span style={{ fontSize:'15px', fontWeight: 700, color: 'var(--color-text-primary)' }}>BackToOwner</span>
+          <div
+            onClick={() => setMobileOpen(v => !v)}
+            style={{ width: '32px', height: '32px', borderRadius: '50%', background: '#4F46E5', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', cursor: 'pointer', fontWeight: 700, fontSize: '14px' }}
+          >{user?.name?.charAt(0)}</div>
         </div>
         <main style={{ flex: 1, padding: '32px', overflowY: 'auto' }}>{children}</main>
       </div>

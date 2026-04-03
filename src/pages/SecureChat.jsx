@@ -24,21 +24,33 @@ export default function SecureChat() {
 
   useEffect(() => {
     if (!chatId) return
+
     const fetchChat = async () => {
       try {
+        // 1. Fetch messages
         const res = await chatAPI.getMessages(chatId)
-        if (res.success) {
-          setMessages(res.messages)
+        if (res.success) setMessages(res.messages)
+
+        // 2. Fetch chat status from user chat list
+        const chatsRes = await chatAPI.getUserChats()
+        if (chatsRes.success) {
+          const thisChat = chatsRes.chats.find(c => c._id === chatId)
+          if (thisChat) {
+            setChatInfo(thisChat)
+            if (thisChat.status === 'closed') {
+              setIsResolved(true)
+            }
+          }
         }
       } catch (err) {
-        console.error('Failed to fetch messages:', err)
+        console.error('Failed to fetch chat:', err)
       } finally {
         setLoading(false)
       }
     }
 
-    const interval = setInterval(fetchChat, 3000) // Poll every 3 seconds for simplicity
     fetchChat()
+    const interval = setInterval(fetchChat, 5000)
     return () => clearInterval(interval)
   }, [chatId])
 
@@ -84,7 +96,28 @@ export default function SecureChat() {
   }
 
   if (loading) {
-    return <DashboardLayout><div style={{ textAlign:'center', paddingTop:'100px' }}>Loading real-time chat...</div></DashboardLayout>
+    return <DashboardLayout><div style={{ textAlign:'center', paddingTop:'100px', color:'var(--color-text-muted)' }}>Loading chat...</div></DashboardLayout>
+  }
+
+  // Guard: if chat is closed and user navigates directly to URL, redirect them
+  if (isResolved && chatInfo?.status === 'closed') {
+    return (
+      <DashboardLayout>
+        <div style={{ maxWidth:'520px', margin:'80px auto', textAlign:'center', padding:'48px', background:'var(--color-card)', borderRadius:'24px', border:'1px solid var(--color-card-border)' }}>
+          <div style={{ fontSize:'48px', marginBottom:'16px' }}>✅</div>
+          <h2 style={{ fontSize:'22px', fontWeight:800, color:'var(--color-text-primary)', marginBottom:'8px' }}>Chat Closed</h2>
+          <p style={{ fontSize:'14px', color:'var(--color-text-secondary)', marginBottom:'28px', lineHeight:1.6 }}>
+            This conversation has been resolved. The item was successfully returned.
+          </p>
+          <button
+            onClick={() => navigate('/chats')}
+            style={{ padding:'12px 28px', borderRadius:'12px', background:'#4F46E5', border:'none', color:'#fff', fontWeight:700, fontSize:'14px', cursor:'pointer' }}
+          >
+            ← Back to Chats
+          </button>
+        </div>
+      </DashboardLayout>
+    )
   }
 
   return (
