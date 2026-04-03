@@ -44,8 +44,8 @@ const allowedOrigins = [
   process.env.CORS_ORIGIN
 ].filter(Boolean);
 
-app.use(cors({ 
-  origin: allowedOrigins,
+app.use(cors({
+  origin: "https://back-to-owner.vercel.app",
   credentials: true
 }));
 
@@ -60,7 +60,7 @@ if (process.env.NODE_ENV === 'production') {
 }
 
 // Global Limiter - Move AFTER CORS so errors have CORS headers
-app.use(globalLimiter); 
+app.use(globalLimiter);
 
 // Routes
 app.get('/', (req, res) => {
@@ -78,8 +78,8 @@ app.use('/api/notifications', notificationRoutes);
 // Admin Auto-Seeder Utility
 const seedAdmin = async () => {
   try {
-    const email    = (process.env.ADMIN_EMAIL    || 'admin123@nitw.ac.in').toLowerCase();
-    const password =  process.env.ADMIN_PASSWORD || 'admin123';
+    const email = (process.env.ADMIN_EMAIL || 'admin123@nitw.ac.in').toLowerCase();
+    const password = process.env.ADMIN_PASSWORD || 'admin123';
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
 
